@@ -1,0 +1,265 @@
+<div class="container-fluid py-5 min-vh-100 animate-fade">
+    <div class="hub-container mx-auto" style="max-width: 1400px;">
+        <!-- Hub Header -->
+        <header class="d-flex justify-content-between align-items-center mb-5 pb-4 border-bottom border-glass">
+            <div class="d-flex align-items-center">
+                <a routerLink="/super-admin" class="btn glass border-0 text-emerald me-4 hover-lift p-3 rounded-circle"
+                    style="background: rgba(16, 185, 129, 0.1);">
+                    <i class="bi bi-arrow-left fs-4"></i>
+                </a>
+                <div>
+                    <h2 class="display-6 fw-bold text-white mb-0 ls-tight">Stakeholder Hub</h2>
+                    <p class="text-muted text-emerald mb-0 opacity-75">Governing access and assets for <span
+                            class="text-emerald fw-bold">{{ userId() }}</span></p>
+                </div>
+            </div>
+            <div class="d-none d-md-block">
+                <div class="badge glass border-emerald text-emerald p-3 rounded-pill shadow-emerald">
+                    <i class="bi bi-hdd-network me-2"></i> NODE READY
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic Navigation Matrix -->
+        <ul class="nav nav-pills mb-5 g-3 animate-slide" style="animation-delay: 0.1s">
+            <li class="nav-item">
+                <button class="nav-link" [class.active]="activeTab() === 'analytics'"
+                    (click)="activeTab.set('analytics')">
+                    <i class="bi bi-graph-up-arrow me-2"></i> STRATEGIC PERFORMANCE
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" [class.active]="activeTab() === 'foodItems'"
+                    (click)="activeTab.set('foodItems')">
+                    <i class="bi bi-box-seam me-2"></i> ASSET CATALOG
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" [class.active]="activeTab() === 'config'" (click)="activeTab.set('config')">
+                    <i class="bi bi-sliders me-2"></i> NODE CONFIG
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" [class.active]="activeTab() === 'billing'" (click)="activeTab.set('billing')">
+                    <i class="bi bi-receipt me-2"></i> BILLING SHELL
+                </button>
+            </li>
+        </ul>
+
+        <!-- Content Matrix -->
+        <div [ngSwitch]="activeTab()" class="tab-viewport">
+            <!-- Analytics Tab -->
+            <div *ngSwitchCase="'analytics'" class="animate-fade">
+                <app-user-analytics [inputUserId]="userId()"></app-user-analytics>
+            </div>
+
+            <!-- Asset Catalog Tab -->
+            <div *ngSwitchCase="'foodItems'" class="animate-fade">
+                <div class="d-flex justify-content-between align-items-center mb-5">
+                    <h4 class="text-white mb-0 ls-tight">Distributed Asset Catalog</h4>
+                    <button class="btn-premium px-4 py-2 rounded-pill" (click)="isAdding.set(true)" *ngIf="!isAdding()">
+                        <i class="bi bi-plus-lg me-2"></i> REGISTER NEW ASSET
+                    </button>
+                </div>
+
+                <!-- Enhanced Registration Form Shell -->
+                <div *ngIf="isAdding()" class="glass-card p-5 mb-5 border-emerald shadow-emerald animate-slide"
+                    style="border-radius: 32px;">
+                    <div class="d-flex justify-content-between align-items-center mb-5">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-box bg-emerald bg-opacity-10 me-3" style="width: 50px; height: 50px;">
+                                <i class="bi bi-plus-circle text-emerald fs-4"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-white mb-0 ls-tight">Enhanced Asset Enrollment</h4>
+                                <p class="text-emerald small mb-0 opacity-75">Initialize node assets with high-fidelity
+                                    metadata</p>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm glass text-emerald rounded-pill px-4" (click)="isAdding.set(false)"
+                            style="border: 1px solid rgba(16, 185, 129, 0.3);">
+                            <i class="bi bi-x-lg me-2"></i> CANCEL
+                        </button>
+                    </div>
+
+                    <form class="row g-4" (ngSubmit)="addFoodItem()">
+                        <!-- Left Column: Core Identity -->
+                        <div class="col-lg-6">
+                            <div class="mb-4">
+                                <label class="form-label ls-wide small fw-bold text-emerald opacity-100 mb-2">ASSET
+                                    NOMENCLATURE</label>
+                                <input type="text" class="form-control p-3 bg-glass border-glass text-white" name="name"
+                                    [(ngModel)]="newFoodItem.name" placeholder="e.g. Strategic Computing Cluster"
+                                    required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label ls-wide small fw-bold text-emerald opacity-100 mb-2">VALUATION
+                                    (₹)</label>
+                                <div class="input-group bg-glass rounded-3 border-glass overflow-hidden">
+                                    <span class="input-group-text bg-transparent border-0 text-emerald">₹</span>
+                                    <input type="number"
+                                        class="form-control p-3 bg-transparent border-0 text-white shadow-none"
+                                        name="price" [(ngModel)]="newFoodItem.price" placeholder="0.00" required>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="form-label ls-wide small fw-bold text-emerald opacity-100 mb-2">TECHNICAL
+                                    SYNOPSIS</label>
+                                <textarea class="form-control p-3 bg-glass border-glass text-white" name="description"
+                                    [(ngModel)]="newFoodItem.description" rows="4"
+                                    placeholder="Technical specifications and node utility..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Visual Provisioning -->
+                        <div class="col-lg-6">
+                            <div class="mb-4">
+                                <label class="form-label ls-wide small fw-bold text-emerald opacity-100 mb-2">IMAGE
+                                    PROVISIONING MODE</label>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-6">
+                                        <button type="button" class="btn w-100 p-3 glass border-glass text-emerald fs-6"
+                                            [class.active]="!newFoodItem.imageUrl" (click)="newFoodItem.imageUrl = ''">
+                                            <i class="bi bi-upload me-2"></i> FILE UPLOAD
+                                        </button>
+                                    </div>
+                                    <div class="col-6">
+                                        <button type="button" class="btn w-100 p-3 glass border-glass text-emerald fs-6"
+                                            [class.active]="newFoodItem.imageUrl"
+                                            (click)="newFoodItem.imageUrl = 'https://'">
+                                            <i class="bi bi-link-45deg me-2"></i> IMAGE URL
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div *ngIf="newFoodItem.imageUrl !== undefined && newFoodItem.imageUrl.startsWith('http')"
+                                    class="animate-fade">
+                                    <input type="url" class="form-control p-3 bg-glass border-glass text-white mb-3"
+                                        name="imageUrl" [(ngModel)]="newFoodItem.imageUrl"
+                                        placeholder="https://example.com/asset.png">
+                                    <div class="bg-glass rounded-3 p-2 text-center"
+                                        style="min-height: 120px; border: 2px dashed rgba(16, 185, 129, 0.2);">
+                                        <img [src]="newFoodItem.imageUrl" *ngIf="newFoodItem.imageUrl.length > 10"
+                                            class="rounded-3 shadow-lg"
+                                            style="max-height: 100px; max-width: 100%; object-fit: contain;">
+                                        <p class="text-muted small mt-2" *ngIf="newFoodItem.imageUrl.length <= 10">Live
+                                            Preview Terminal</p>
+                                    </div>
+                                </div>
+
+                                <div *ngIf="!newFoodItem.imageUrl || !newFoodItem.imageUrl.startsWith('http')"
+                                    class="animate-fade">
+                                    <div class="upload-zone p-4 bg-glass border-glass rounded-3 text-center hover-lift position-relative"
+                                        style="border: 2px dashed rgba(16, 185, 129, 0.3);">
+                                        <i class="bi bi-cloud-arrow-up fs-2 text-emerald mb-2"></i>
+                                        <p class="text-muted small mb-0">Drag and drop or click to upload</p>
+                                        <input type="file" (change)="onFileSelected($event)"
+                                            class="position-absolute top-0 start-0 w-100 h-100 opacity-0 cursor-pointer"
+                                            style="z-index: 10;">
+                                        <div class="mt-2 text-emerald small fw-bold" *ngIf="selectedFile">
+                                            <i class="bi bi-check2-circle me-1"></i> {{ selectedFile.name }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 border-top border-glass pt-5 mt-5">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <p class="text-muted small mb-0"><i class="bi bi-shield-check text-emerald me-2"></i>
+                                    Secure Enrollment Protocol</p>
+                                <button type="submit"
+                                    class="btn-primary btn px-5 py-3 rounded-pill fw-bold shadow-emerald hover-lift">
+                                    <i class="bi bi-plus-lg me-2"></i> {{ isEditing ? 'COMMIT UPDATES' : 'ENROLL NEW
+                                    ASSET' }}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Asset Grid -->
+                <div class="row g-4 mb-5">
+                    <div class="col-xl-3 col-md-4 col-sm-6" *ngFor="let item of foodItems()">
+                        <div class="catalog-card h-100 d-flex flex-column shadow-lg">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <span class="asset-id-badge text-emerald">ASSET #{{ item.id }}</span>
+                                <button
+                                    class="btn btn-sm text-danger opacity-50 hover-opacity-100 p-0 border-0 bg-transparent"
+                                    (click)="deleteFoodItem(item.id!)" title="Decommission Asset">
+                                    <i class="bi bi-trash3 fs-6"></i>
+                                </button>
+                            </div>
+
+                            <div class="asset-icon-box mb-4 overflow-hidden position-relative shadow-sm mx-auto w-100"
+                                style="height: 160px; border-radius: 18px;">
+                                <img *ngIf="item.imageUrl" [src]="getImageUrl(item.imageUrl)"
+                                    class="w-100 h-100 object-fit-cover" alt="Asset Preview">
+                                <i *ngIf="!item.imageUrl" class="bi bi-box-seam fs-1 text-emerald opacity-50"></i>
+                                <div class="glass-reflection"></div>
+                            </div>
+
+                            <div class="mb-4 text-start">
+                                <h6 class="text-white fw-bold mb-1 fs-5 ls-tight text-truncate" [title]="item.name">{{
+                                    item.name }}</h6>
+                                <p class="text-muted text-emerald small mb-0 opacity-75 text-truncate"
+                                    [title]="item.description || 'Verified node asset'">
+                                    {{ item.description || 'Verified node asset' }}
+                                </p>
+                            </div>
+
+                            <div class="mt-auto value-footer d-flex justify-content-between align-items-center">
+                                <div class="text-start">
+                                    <small class="text-muted text-emerald ls-wide d-block mb-1"
+                                        style="font-size: 0.65rem; font-weight: 700;">VALUATION</small>
+                                    <span class="text-emerald fw-bold fs-5">₹{{ item.price | number:'1.2-2' }}</span>
+                                </div>
+                                <button
+                                    class="btn btn-sm glass border-emerald text-emerald rounded-circle p-2 hover-lift"
+                                    (click)="editItem(item)" title="Edit Asset">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 text-center py-5" *ngIf="foodItems().length === 0">
+                        <div class="glass-card p-5 d-inline-block shadow-lg mx-auto border-glass"
+                            style="max-width: 450px; border-radius: 32px;">
+                            <div class="icon-box bg-emerald bg-opacity-10 mx-auto mb-4"
+                                style="width: 100px; height: 100px; border-radius: 20px;">
+                                <i class="bi bi-inbox fs-1 text-emerald opacity-25"></i>
+                            </div>
+                            <h4 class="text-white mb-2 fw-bold">No Assets Registered</h4>
+                            <p class="text-muted text-emerald small mb-4 opacity-75">This stakeholder node currently has
+                                no active assets enrolled in the registry.</p>
+                            <button class="btn-primary btn px-5 py-3 rounded-pill fw-bold shadow-emerald hover-lift"
+                                (click)="isAdding.set(true)">
+                                <i class="bi bi-plus-lg me-2"></i> ENROLL NEW ASSET
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Node Config Tab -->
+            <div *ngSwitchCase="'config'" class="animate-fade">
+                <div class="glass-card p-5 text-center">
+                    <i class="bi bi-shield-lock display-3 text-muted mb-4 d-block"></i>
+                    <h4 class="text-white mb-2">Node Security Controls</h4>
+                    <p class="text-muted">Stakeholder configuration and access tokens are currently being synthesized.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Billing Shell Tab -->
+            <div *ngSwitchCase="'billing'" class="animate-fade">
+                <div class="glass-card p-5 text-center">
+                    <i class="bi bi-receipt-cutoff display-3 text-muted mb-4 d-block"></i>
+                    <h4 class="text-white mb-2">Billing Infrastructure Shell</h4>
+                    <p class="text-muted">Legacy billing reconciliation and ledger history.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

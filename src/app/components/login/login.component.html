@@ -1,0 +1,63 @@
+<div class="row justify-content-center align-items-center min-vh-100 animate-slide">
+  <div class="col-xl-5 col-lg-6 col-md-8">
+    <div class="glass-card p-5 shadow-2xl">
+      <div class="text-center mb-5">
+        <div class="p-3 bg-emerald bg-opacity-10 rounded-circle d-inline-block mb-3">
+          <i class="bi bi-bank2 fs-1 text-emerald"></i>
+        </div>
+        <h2 class="display-5 fw-bold text-white mb-2">Z-FINANCE</h2>
+        <p class="text-emerald text-uppercase fs-6 fw-bold ls-wider">Secured Access Terminal</p>
+      </div>
+
+      <form *ngIf="!isLoggedIn" name="form" (ngSubmit)="f.form.valid && onSubmit()" #f="ngForm" novalidate>
+        <div class="form-group mb-4">
+          <label class="form-label large-label">USERNAME</label>
+          <div class="input-group glass rounded-3 overflow-hidden">
+            <span class="input-group-text bg-transparent border-0 text-muted ps-3">
+              <i class="bi bi-person"></i>
+            </span>
+            <input type="text" class="form-control bg-transparent border-0 text-white p-4 shadow-none large-input"
+              name="username" [(ngModel)]="form.username" required #username="ngModel"
+              [ngClass]="{ 'is-invalid': f.submitted && username.errors }" placeholder="Enter username" />
+          </div>
+          <div *ngIf="username.errors && f.submitted" class="text-danger small mt-2 animate-fade">
+            <i class="bi bi-exclamation-circle me-1"></i> Identity is required
+          </div>
+        </div>
+
+        <div class="form-group mb-5">
+          <label class="form-label large-label">SECURITY PASSWORD</label>
+          <div class="input-group glass rounded-3 overflow-hidden">
+            <span class="input-group-text bg-transparent border-0 text-muted ps-3">
+              <i class="bi bi-key"></i>
+            </span>
+            <input type="password" class="form-control bg-transparent border-0 text-white p-4 shadow-none large-input"
+              name="password" [(ngModel)]="form.password" required minlength="6" #password="ngModel"
+              [ngClass]="{ 'is-invalid': f.submitted && password.errors }" placeholder="Enter password" />
+          </div>
+          <div *ngIf="password.errors && f.submitted" class="text-danger small mt-2 animate-fade">
+            <i class="bi bi-exclamation-circle me-1"></i> Security key must be at least 6 characters
+          </div>
+        </div>
+
+        <button class="btn-premium w-100 py-3 fs-5 shadow-lg">
+          Authenticate <i class="bi bi-arrow-right ms-2"></i>
+        </button>
+
+        <div class="text-center mt-4">
+          <p class="text-muted small"><i class="bi bi-shield-shaded me-1"></i> Unauthorized access is strictly
+            prohibited</p>
+        </div>
+      </form>
+
+      <div class="text-center py-4 animate-fade" *ngIf="isLoggedIn">
+        <div class="p-3 bg-success bg-opacity-10 rounded-circle d-inline-block mb-3">
+          <i class="bi bi-check2-all fs-1 text-success"></i>
+        </div>
+        <h4 class="text-white">Authenticated Successfully</h4>
+        <p class="text-muted">Redirecting to your command center...</p>
+        <a routerLink="/home" class="btn btn-premium-outline mt-3">Go to Dashboard</a>
+      </div>
+    </div>
+  </div>
+</div>

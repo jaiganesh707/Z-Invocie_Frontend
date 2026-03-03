@@ -1,0 +1,70 @@
+<div class="row g-4 animate-fade">
+    <div class="col-lg-4">
+        <div class="glass-card p-4 text-center">
+            <div class="profile-avatar mb-4 mx-auto p-1 bg-gradient-emerald rounded-circle position-relative"
+                style="width: 140px; height: 140px; cursor: pointer;" (click)="profileImageInput.click()">
+                <div
+                    class="bg-dark rounded-circle w-100 h-100 d-flex align-items-center justify-content-center overflow-hidden border border-emerald border-opacity-25">
+                    <img *ngIf="selectedImagePreview" [src]="selectedImagePreview" class="w-100 h-100 object-fit-cover">
+                    <i *ngIf="!selectedImagePreview" class="bi bi-person-circle display-1 text-emerald"></i>
+
+                    <div
+                        class="position-absolute bottom-0 start-0 w-100 bg-dark bg-opacity-75 py-2 text-center opacity-0 hover-opacity-100 transition-all">
+                        <small class="text-emerald fw-bold ls-tight"><i class="bi bi-camera-fill me-1"></i>
+                            UPDATE</small>
+                    </div>
+                </div>
+            </div>
+            <input type="file" #profileImageInput class="d-none" (change)="onFileSelected($event)">
+            <h4 class="text-white mb-1">{{ currentUser.username }}</h4>
+            <span class="badge glass border-emerald text-emerald px-3 py-2">{{ currentUser.role }}</span>
+            <hr class="border-glass my-4">
+            <div class="text-start mb-4">
+                <small class="text-muted text-emerald uppercase d-block mb-3">Portfolio Metadata</small>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted text-emerald">ID:</span>
+                    <span class="text-white">#SEC-{{ currentUser.id }}</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span class="text-muted text-emerald">Member Since:</span>
+                    <span class="text-white">Feb 2026</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="glass-card p-4 h-100">
+            <h5 class="text-white mb-4">Identity Maintenance</h5>
+            <form (ngSubmit)="updateProfile()" class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label text-muted small">Registered Email</label>
+                    <input type="email" name="email" [(ngModel)]="profileForm.email" class="form-control glass-input">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label text-muted small">Secure Contact Line</label>
+                    <input type="text" name="contactNumber" [(ngModel)]="profileForm.contactNumber"
+                        class="form-control glass-input" placeholder="+1-XXX-XXX-XXXX">
+                </div>
+                <div class="col-12 mt-4">
+                    <button type="submit" class="btn btn-premium px-5 py-2">
+                        <i class="bi bi-shield-check me-2"></i> Update Identity Details
+                    </button>
+                </div>
+            </form>
+
+            <hr class="border-glass my-5">
+
+            <h5 class="text-white mb-4">Security Credentials</h5>
+            <div class="glass-card p-3 border-glass-soft bg-opacity-10 bg-info">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-key fs-3 text-info me-3"></i>
+                    <div>
+                        <h6 class="text-white mb-0">Active Session Token</h6>
+                        <p class="text-muted small mb-0 font-monospace">{{ currentUser.token.substring(0, 40) }}...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

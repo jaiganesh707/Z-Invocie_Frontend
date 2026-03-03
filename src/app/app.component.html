@@ -1,0 +1,75 @@
+<div class="app-wrapper">
+    <!-- Mobile Toggle -->
+    <button class="btn btn-emerald glass mobile-toggle d-lg-none" (click)="isSidebarActive = !isSidebarActive">
+        <i class="bi" [class.bi-list]="!isSidebarActive" [class.bi-x-lg]="isSidebarActive"></i>
+    </button>
+
+    <!-- Sidebar Backdrop for Mobile -->
+    <div class="sidebar-overlay d-lg-none" [class.active]="isSidebarActive" (click)="isSidebarActive = false"></div>
+
+    <!-- Permanent Sidebar -->
+    <aside class="sidebar" [class.active]="isSidebarActive">
+        <div class="sidebar-header mb-5 text-center">
+            <a class="d-block text-decoration-none" routerLink="/home">
+                <i class="bi bi-bank2 text-emerald fs-1 mb-2"></i>
+                <h3 class="fs-4 mb-0">Z-FINANCE</h3>
+            </a>
+        </div>
+
+        <nav class="flex-grow-1">
+            <a class="nav-sidebar-link" routerLink="/home" routerLinkActive="active">
+                <i class="bi bi-speedometer2"></i> Global Market
+            </a>
+
+
+
+            <a class="nav-sidebar-link" *ngIf="showSuperAdminBoard" routerLink="/analytics" routerLinkActive="active">
+                <i class="bi bi-graph-up-arrow"></i> Analytics
+            </a>
+
+            <a class="nav-sidebar-link" *ngIf="isLoggedIn && !showSuperAdminBoard"
+                [routerLink]="['/user-billing', userId]" routerLinkActive="active">
+                <i class="bi bi-receipt"></i> Billing
+            </a>
+
+            <a class="nav-sidebar-link" *ngIf="showSuperAdminBoard" routerLink="/super-admin" routerLinkActive="active"
+                (click)="refreshAuthority()">
+                <i class="bi bi-shield-lock"></i> Authority
+            </a>
+
+            <a class="nav-sidebar-link" *ngIf="isLoggedIn" routerLink="/profile" routerLinkActive="active">
+                <i class="bi bi-person-circle"></i> Identity
+            </a>
+
+            <hr class="border-glass my-4">
+
+            <div class="auth-section" *ngIf="!isLoggedIn">
+                <a class="btn-premium w-100 d-block text-center mt-3" routerLink="/login">
+                    <i class="bi bi-box-arrow-in-right me-2"></i> Private Login
+                </a>
+            </div>
+
+            <div class="auth-section" *ngIf="isLoggedIn">
+                <button class="btn btn-premium-outline w-100 text-danger" (click)="logout()">
+                    <i class="bi bi-power me-2"></i> Termination
+                </button>
+            </div>
+        </nav>
+
+        <!-- Sidebar Widgets -->
+        <div class="sidebar-footer mt-auto">
+            <div class="text-center mt-4 smaller text-muted opacity-50">
+                &copy; 2026 Z-FINANCE SECURED
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="main-content">
+        <div class="container-fluid py-4 animate-fade">
+            <router-outlet></router-outlet>
+        </div>
+    </main>
+</div>
+
+<app-toast></app-toast>

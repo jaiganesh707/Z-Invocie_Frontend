@@ -1,0 +1,179 @@
+<div class="container-fluid py-4 min-vh-100">
+    <!-- Premium Header -->
+    <header class="mb-5 animate-fade" *ngIf="!inputUserId">
+        <div class="d-flex align-items-center mb-2">
+            <div class="badge glass border-emerald text-emerald me-3 px-3 py-2">
+                <i class="bi bi-shield-shaded me-2"></i> SECURE TERMINAL
+            </div>
+            <span class="text-muted small ls-wide">REAL-TIME DATA STREAM</span>
+        </div>
+        <h2 class="display-5 fw-bold text-gradient mb-0 ls-tight">Analytics & Insights Terminal</h2>
+        <p class="text-muted opacity-75">Sophisticated performance monitoring for Client #{{ userId }}</p>
+    </header>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="d-flex flex-column justify-content-center align-items-center" style="height: 400px;">
+        <div class="spinner-grow text-emerald mb-3" role="status"></div>
+        <span class="text-muted ls-wide small">SYNCHRONIZING PORTFOLIO...</span>
+    </div>
+
+    <div *ngIf="!isLoading && analyticsData" class="animate-fade">
+        <!-- Dashboard Summary Grid -->
+        <div class="row g-4 mb-5">
+            <!-- Card 1: Gross Assets -->
+            <div class="col-xl-3 col-md-6">
+                <div class="glass-card p-4 h-100 hover-lift active-indicator-emerald">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div class="icon-box bg-emerald shadow-emerald">
+                            <i class="bi bi-currency-exchange"></i>
+                        </div>
+                        <div class="badge glass text-emerald rounded-pill border-emerald-soft">+{{
+                            analyticsData.todayTotalTransactions }} New</div>
+                    </div>
+                    <div class="mb-1">
+                        <span class="text-muted ls-wide text-uppercase small opacity-75">Daily Gross Assets</span>
+                    </div>
+                    <div class="d-flex align-items-baseline">
+                        <h2 class="display-6 fw-bold mb-0 text-white">₹{{ analyticsData.todayRevenue | number:'1.2-2' }}
+                        </h2>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: Burn Rate -->
+            <div class="col-xl-3 col-md-6">
+                <div class="glass-card p-4 h-100 hover-lift active-indicator-blue">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div class="icon-box bg-primary shadow-blue">
+                            <i class="bi bi-fire"></i>
+                        </div>
+                        <div class="badge glass text-primary rounded-pill border-primary-soft">Live Burn</div>
+                    </div>
+                    <div class="mb-1">
+                        <span class="text-muted ls-wide text-uppercase small opacity-75">Today's Burn Rate</span>
+                    </div>
+                    <h2 class="display-6 fw-bold mb-0 text-white">₹{{ analyticsData.todayExpense | number:'1.2-2' }}
+                    </h2>
+                </div>
+            </div>
+
+            <!-- Card 3: Profit Velocity -->
+            <div class="col-xl-3 col-md-6">
+                <div class="glass-card p-4 h-100 hover-lift"
+                    [ngClass]="analyticsData.todayProfit >= 0 ? 'active-indicator-emerald' : 'active-indicator-orange'">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div class="icon-box"
+                            [ngClass]="analyticsData.todayProfit >= 0 ? 'bg-emerald shadow-emerald' : 'bg-warning shadow-orange'">
+                            <i class="bi"
+                                [ngClass]="analyticsData.todayProfit >= 0 ? 'bi-graph-up-arrow' : 'bi-graph-down-arrow'"></i>
+                        </div>
+                        <i class="bi fs-3 animate-bounce"
+                            [ngClass]="analyticsData.todayProfit >= 0 ? 'bi-arrow-up-right text-emerald' : 'bi-arrow-down-right text-danger'"></i>
+                    </div>
+                    <div class="mb-1">
+                        <span class="text-muted ls-wide text-uppercase small opacity-75">Net Profit Velocity</span>
+                    </div>
+                    <h2 class="display-6 fw-bold mb-0"
+                        [ngClass]="analyticsData.todayProfit >= 0 ? 'text-emerald' : 'text-danger'">
+                        ₹{{ analyticsData.todayProfit | number:'1.2-2' }}
+                    </h2>
+                </div>
+            </div>
+
+            <!-- Card 4: Top Asset -->
+            <div class="col-xl-3 col-md-6">
+                <div class="glass-card p-4 h-100 hover-lift active-indicator-pink">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div class="icon-box bg-pink shadow-pink">
+                            <i class="bi bi-star-fill"></i>
+                        </div>
+                        <div class="badge glass text-pink rounded-pill border-pink-soft"
+                            *ngIf="analyticsData.bestMovingProduct">TOP MOVER</div>
+                    </div>
+                    <div class="mb-1">
+                        <span class="text-muted ls-wide text-uppercase small opacity-75">Prime Mover</span>
+                    </div>
+                    <h2 class="h3 fw-bold mb-1 text-white ls-tight" *ngIf="analyticsData.bestMovingProduct">
+                        {{ analyticsData.bestMovingProduct.name }}
+                    </h2>
+                    <p class="text-muted small mb-0 opacity-75" *ngIf="analyticsData.bestMovingProduct">
+                        {{ analyticsData.bestMovingProduct.quantity }} units in circulation
+                    </p>
+                    <h2 class="h3 fw-bold mb-0 text-muted" *ngIf="!analyticsData.bestMovingProduct">No Velocity</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Infrastructure Analytics Section -->
+        <div class="row g-4 mb-5">
+            <div class="col-lg-12">
+                <div class="glass-card p-5">
+                    <div class="d-flex align-items-center mb-5">
+                        <div class="p-2 bg-emerald bg-opacity-10 rounded-3 me-3">
+                            <i class="bi bi-bar-chart-fill text-emerald"></i>
+                        </div>
+                        <h4 class="mb-0 text-white ls-tight">Asset Growth & Performance Architecture</h4>
+                    </div>
+                    <div class="chart-container" style="height:350px;">
+                        <canvas #barChart></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="glass-card p-5">
+                    <h5 class="mb-5 text-white ls-wide text-uppercase small opacity-75">Revenue Distribution</h5>
+                    <div class="chart-container" style="height:300px;">
+                        <canvas #pieChart></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="glass-card p-5">
+                    <h5 class="mb-5 text-white ls-wide text-uppercase small opacity-75">Burn Distribution</h5>
+                    <div class="chart-container" style="height:300px;">
+                        <canvas #expenseChart></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Ledger -->
+        <div class="glass-card overflow-hidden">
+            <div class="p-4 bg-glass border-bottom border-glass d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-white ls-tight"><i class="bi bi-list-task me-2 text-emerald"></i> Detailed Asset
+                    Ledger</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover mb-0 table-horizontal-spacing">
+                    <thead>
+                        <tr class="text-muted bg-glass opacity-75">
+                            <th class="ps-5 py-4 ls-wide small">ASSET IDENTITY</th>
+                            <th class="py-4 text-center ls-wide small">CIRCULATION</th>
+                            <th class="py-4 text-end pe-5 ls-wide small">REALIZED REVENUE</th>
+                        </tr>
+                    </thead>
+                    <tbody class="border-top-0">
+                        <tr *ngFor="let stat of analyticsData.productSalesStats" class="border-glass">
+                            <td class="ps-5 py-4">
+                                <div class="fw-bold text-white fs-5">{{ stat.productName }}</div>
+                                <div class="text-muted small opacity-50">#PN-{{
+                                    stat.productName.substring(0,3).toUpperCase() }}</div>
+                            </td>
+                            <td class="py-4 text-center">
+                                <span
+                                    class="badge rounded-pill bg-emerald bg-opacity-10 text-emerald border border-emerald-soft px-3 py-2">
+                                    {{ stat.quantity }} Units Distributed
+                                </span>
+                            </td>
+                            <td class="py-4 text-end pe-5">
+                                <span class="fw-bold text-white fs-5">₹{{ stat.revenue | number:'1.2-2' }}</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

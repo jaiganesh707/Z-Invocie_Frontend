@@ -1,0 +1,259 @@
+<div class="row g-4 animate-slide no-print">
+    <div class="col-md-12">
+        <header class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div class="d-flex align-items-center">
+                <div class="avatar-lg bg-emerald bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3"
+                    style="width: 80px; height: 80px; border: 2px solid rgba(16, 185, 129, 0.3); overflow: hidden;"
+                    *ngIf="user">
+                    <img *ngIf="user.imageUrl" [src]="getImageUrl(user.imageUrl)" class="w-100 h-100 object-fit-cover">
+                    <span *ngIf="!user.imageUrl" class="text-emerald fw-bold fs-1">{{
+                        user.username.charAt(0).toUpperCase() }}</span>
+                </div>
+                <div>
+                    <h2 class="display-5 mb-0 text-gradient">{{ user?.username || 'Financial Statement Architecture' }}
+                    </h2>
+                    <div class="badge glass border-emerald text-emerald p-2 px-3 mt-2">
+                        <i class="bi bi-person-circle me-2"></i> Client Signature: {{ userId }}
+                    </div>
+                </div>
+            </div>
+            <a [routerLink]="['/user-analytics', userId]" class="btn btn-premium-outline px-4">
+                <i class="bi bi-graph-up-arrow me-2"></i> View Analytics Terminal
+            </a>
+        </header>
+    </div>
+</div>
+
+<div class="row mt-4 no-print" *ngIf="!isGenerated">
+    <div class="col-lg-8 animate-slide" style="animation-delay: 0.1s">
+        <div class="glass-card h-100 p-4">
+            <div class="d-flex align-items-center mb-4 flex-wrap gap-3">
+                <div class="d-flex align-items-center me-auto">
+                    <div class="p-2 bg-emerald bg-opacity-10 rounded-3 me-3">
+                        <i class="bi bi-grid-fill text-emerald"></i>
+                    </div>
+                    <h5 class="mb-0 text-emerald">Asset Selection</h5>
+                    <div class="spinner-border spinner-border-sm text-emerald ms-3" role="status" *ngIf="isLoading">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                <!-- Unique Search Bar -->
+                <div class="input-group glass rounded-pill overflow-hidden border border-emerald border-opacity-25 shadow-sm"
+                    style="max-width: 350px;">
+                    <span class="input-group-text bg-transparent border-0 text-emerald px-3">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" class="form-control bg-transparent border-0 text-white shadow-none ps-0"
+                        placeholder="Search keywords, items..." [(ngModel)]="searchQuery">
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12" *ngFor="let item of filteredFoodItems">
+                    <div class="catalog-card shadow-lg">
+                        <!-- Premium Preview Area -->
+                        <div class="asset-icon-box mb-4 position-relative shadow-sm">
+                            <img *ngIf="item.imageUrl" [src]="getImageUrl(item.imageUrl)"
+                                class="w-100 h-100 object-fit-cover" alt="Asset Preview">
+                            <div *ngIf="!item.imageUrl" class="d-flex align-items-center justify-content-center h-100">
+                                <i class="bi bi-box-seam fs-1 text-emerald opacity-25"></i>
+                            </div>
+                            <div class="glass-reflection"></div>
+                        </div>
+
+                        <div class="text-start mb-3">
+                            <h6 class="fw-bold text-white mb-2 ls-tight text-truncate" [title]="item.name">{{ item.name
+                                }}</h6>
+                            <p *ngIf="item.description" class="text-muted small mb-3 text-truncate-2"
+                                style="font-size: 0.75rem;">{{ item.description }}</p>
+                            <span class="text-emerald fw-bold fs-4">
+                                {{ item.currency === 'USD' ? '$' : '₹' }}{{ item.price | number:'1.2-2' }}
+                            </span>
+                        </div>
+
+                        <!-- Precision Quantity Dispatcher -->
+                        <div class="quantity-selector">
+                            <button class="quantity-btn"
+                                (click)="qtyInput.value = (+qtyInput.value > 1 ? +qtyInput.value - 1 : 1).toString()">
+                                <i class="bi bi-dash-circle"></i>
+                            </button>
+                            <input type="number" #qtyInput value="1" min="1"
+                                class="border-0 bg-transparent text-white text-center fw-bold"
+                                style="width: 35px; outline: none; font-size: 1rem;">
+                            <button class="quantity-btn" (click)="qtyInput.value = (+qtyInput.value + 1).toString()">
+                                <i class="bi bi-plus-circle"></i>
+                            </button>
+                        </div>
+
+                        <!-- Add to Cart Action -->
+                        <button class="commit-to-ledger d-flex align-items-center justify-content-center"
+                            (click)="addToBill(item, +qtyInput.value)">
+                            <i class="bi bi-plus-lg me-2"></i> <span>COMMIT TO LEDGER</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4 animate-slide mt-4 mt-lg-0" style="animation-delay: 0.2s">
+        <div class="glass-card h-100 p-4 border-emerald border-opacity-25">
+            <div class="d-flex align-items-center mb-4">
+                <div class="p-2 bg-emerald bg-opacity-10 rounded-3 me-3">
+                    <i class="bi bi-cart-check-fill text-emerald"></i>
+                </div>
+                <h5 class="mb-0 text-emerald">Ledger Composition</h5>
+            </div>
+            <div class="selected-items-list mb-4 overflow-auto pe-2" style="max-height: 400px;">
+                <div class="bg-glass border border-glass p-3 mb-3 d-flex align-items-center rounded-4 animate-fade shadow-sm hover-lift"
+                    *ngFor="let si of selectedItems; let i = index">
+                    <div class="fw-bold pe-3 text-emerald"
+                        style="font-size: 1.1rem; border-right: 1px solid rgba(16, 185, 129, 0.2);">
+                        {{ si.quantity }}<small style="font-size: 0.6rem; vertical-align: middle;">X</small>
+                    </div>
+                    <div class="flex-grow-1 ps-3">
+                        <h6 class="mb-1 text-white fw-bold ls-tight" style="font-size: 0.9rem;">{{ si.foodItem.name }}
+                        </h6>
+                        <div class="text-muted text-emerald small opacity-75" style="font-size: 0.75rem;">
+                            Rate: ₹{{ si.foodItem.price | number:'1.2-2' }}
+                        </div>
+                    </div>
+                    <div class="text-end ms-2">
+                        <div class="fw-bold text-white mb-2" style="font-size: 1rem;">
+                            ₹{{ (si.foodItem.price * si.quantity) | number:'1.2-2' }}
+                        </div>
+                        <button class="btn btn-sm text-rose opacity-50 hover-opacity-100 p-0 bg-transparent border-0"
+                            (click)="removeFromBill(i)">
+                            <i class="bi bi-trash3 fs-6"></i>
+                        </button>
+                    </div>
+                </div>
+                <!-- ... no items message ... -->
+            </div>
+            <div class="border-top border-glass pt-4">
+                <button class="btn btn-premium-outline w-100 py-3 mb-3 rounded-pill">
+                    <i class="bi bi-tag-fill me-2"></i> APPLY PROMO CODE
+                </button>
+                <button
+                    class="btn-premium w-100 py-3 fs-5 shadow-lg rounded-pill d-flex justify-content-between align-items-center px-4"
+                    (click)="generateBill()" [disabled]="selectedItems.length === 0">
+                    <span>SETTLE LEDGER (₹{{ totalAmount | number:'1.2-2' }})</span>
+                    <i class="bi bi-arrow-right-circle-fill"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bill Formate to Print -->
+<div class="row mt-5 justify-content-center animate-slide" *ngIf="isGenerated">
+    <div class="col-md-10">
+        <div class="glass-card shadow-2xl p-0 overflow-hidden" id="printableBill">
+            <!-- Glass Header for UI, Simple for Print -->
+            <div
+                class="p-4 p-md-5 d-flex flex-column flex-md-row justify-content-between align-items-md-center border-bottom border-glass bg-glass no-print gap-3">
+                <h2 class="mb-0 text-gradient ls-tight"><i class="bi bi-bank2 text-emerald me-3"></i>Z-FINANCE</h2>
+                <div class="text-end">
+                    <span
+                        class="badge glass border-emerald text-emerald p-3 px-4 shadow-lg rounded-pill ls-wide">AUTHENTICATED
+                        FINANCIAL STATEMENT</span>
+                </div>
+            </div>
+
+            <div class="card-body p-5 bg-white text-dark printable-content">
+                <div class="text-center mb-5 only-print">
+                    <h1 class="display-4 fw-bold">Z-FINANCE</h1>
+                    <p class="text-muted fs-5">Certified Wealth Management Statement</p>
+                </div>
+
+                <div class="row mb-5 gy-4">
+                    <div class="col-sm-6">
+                        <h6 class="text-uppercase text-muted fw-bold mb-3 ls-wide">Recipient Details</h6>
+                        <div class="fs-5 text-dark fw-semibold">{{ generatedInvoice.user.username }}</div>
+                        <div class="text-muted">{{ generatedInvoice.user.email }}</div>
+                        <div class="text-muted mt-2">Client ID: #{{ userId }}</div>
+                    </div>
+                    <div class="col-sm-6 text-sm-end">
+                        <h6 class="text-uppercase text-muted fw-bold mb-3 ls-wide">Invoice Info</h6>
+                        <div class="fs-5 text-dark fw-semibold">Statement #{{ generatedInvoice.id }}</div>
+                        <div class="text-muted">{{ generatedInvoice.createdAt | date:'MMMM d, yyyy' }}</div>
+                        <div class="text-muted">{{ generatedInvoice.createdAt | date:'h:mm a' }}</div>
+                    </div>
+                </div>
+
+                <div class="table-responsive-sm">
+                    <table class="table table-borderless fs-5">
+                        <thead class="border-bottom-2 border-dark">
+                            <tr class="text-muted">
+                                <th class="py-3">Line Item</th>
+                                <th class="py-3 text-center">Unit Price</th>
+                                <th class="py-3 text-center">Qty</th>
+                                <th class="py-3 text-end">Extended Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let item of generatedInvoice.items; let i = index"
+                                class="border-bottom border-light">
+                                <td class="py-4">
+                                    <div class="fw-bold fs-5">{{ item.foodItem.name }}</div>
+                                    <div class="text-muted small">ID: {{ item.foodItem.id }}</div>
+                                </td>
+                                <td class="py-4 text-center">
+                                    {{ item.foodItem.currency === 'USD' ? '$' : '₹' }}{{ item.price }}
+                                </td>
+                                <td class="py-4 text-center">{{ item.quantity }}</td>
+                                <td class="py-4 text-end fw-bold">
+                                    {{ item.foodItem.currency === 'USD' ? '$' : '₹' }}{{ (item.price * item.quantity) }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="row pt-5">
+                    <div class="col-lg-5 col-sm-12 ms-auto">
+                        <div class="p-4 bg-light rounded-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted">Total Gross Assets</span>
+                                <span>
+                                    {{ generatedInvoice.items[0]?.foodItem?.currency === 'USD' ? '$' : '₹' }}{{
+                                    generatedInvoice.totalAmount }}
+                                </span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted">Surcharge (WAIVED)</span>
+                                <span>$0.00 / ₹0.00</span>
+                            </div>
+                            <hr class="my-3">
+                            <div class="d-flex justify-content-between align-items-center h3 mb-0">
+                                <span class="fw-bold">Net Asset Value (NAV)</span>
+                                <span class="fw-bold text-emerald">
+                                    {{ generatedInvoice.items[0]?.foodItem?.currency === 'USD' ? '$' : '₹' }}{{
+                                    generatedInvoice.totalAmount }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-5 text-center text-muted fw-light">
+                    <p>Verified by Z-FINANCE SECURED. This is a legally valid digital document.</p>
+                </div>
+            </div>
+
+            <div
+                class="card-footer bg-glass border-top border-glass p-4 no-print d-flex justify-content-center flex-wrap gap-3">
+                <button class="btn-premium px-5 py-3 rounded-pill fw-bold shadow-emerald hover-lift"
+                    (click)="printBill()">
+                    <i class="bi bi-printer-fill me-2"></i> AUTHORIZE PRINT
+                </button>
+                <button class="btn-premium-outline px-5 py-3 rounded-pill fw-bold hover-lift" (click)="reset()">
+                    <i class="bi bi-plus-circle me-2"></i> NEW RECONCILIATION
+                </button>
+                <a class="btn btn-link text-emerald opacity-75 hover-opacity-100 text-decoration-none"
+                    routerLink="/super-admin">
+                    <i class="bi bi-arrow-left me-1"></i> Return to Terminal
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

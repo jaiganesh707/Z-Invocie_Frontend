@@ -1,0 +1,76 @@
+<div class="animate-fade">
+    <div *ngIf="isLoading" class="d-flex flex-column justify-content-center align-items-center" style="height: 400px;">
+        <div class="spinner-grow text-primary mb-3" role="status"></div>
+        <span class="text-muted ls-wide small">AGGREGATING STRATEGIC DATA...</span>
+    </div>
+
+    <div *ngIf="!isLoading" class="row g-4 animate-fade">
+        <!-- Main Comparative Matrix -->
+        <div class="col-lg-12">
+            <div class="analytics-card">
+                <div class="d-flex justify-content-between align-items-center mb-5">
+                    <div>
+                        <h4 class="text-white mb-1 ls-tight">Stakeholder Profitability Matrix</h4>
+                        <p class="text-muted text-emerald small mb-0 opacity-75">Comparative analysis of net realized
+                            profit per node
+                        </p>
+                    </div>
+                    <div class="icon-box bg-primary bg-opacity-10 shadow-sm">
+                        <i class="bi bi-bar-chart-line text-primary"></i>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas baseChart [data]="barChartData" [options]="barChartOptions" [type]="barChartType">
+                    </canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Hierarchy Ledger -->
+        <div class="col-lg-12">
+            <div class="analytics-card p-0 overflow-hidden">
+                <div class="p-4 bg-glass border-bottom border-glass d-flex justify-content-between align-items-center">
+                    <h5 class="text-white mb-0 ls-tight"><i class="bi bi-trophy me-3 text-secondary"></i> Stakeholder
+                        Performance Hierarchy</h5>
+                    <span class="badge glass border-emerald text-emerald font-monospace small">SORTED BY NET
+                        PROFIT</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover mb-0">
+                        <thead>
+                            <tr class="text-muted bg-glass opacity-75">
+                                <th class="ps-5 py-4 ls-wide small">STAKEHOLDER</th>
+                                <th class="py-4 text-center ls-wide small">GROSS REVENUE</th>
+                                <th class="py-4 text-center ls-wide small">DAILY BURN</th>
+                                <th class="text-end pe-5 py-4 ls-wide small">NET PROFIT</th>
+                            </tr>
+                        </thead>
+                        <tbody class="border-top-0">
+                            <tr *ngFor="let p of performanceData" class="border-glass animate-fade">
+                                <td class="ps-5 py-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3"
+                                            style="width: 40px; height: 40px; border: 1px solid var(--glass-border);">
+                                            <span class="text-primary small fw-bold">{{
+                                                p.username.charAt(0).toUpperCase() }}</span>
+                                        </div>
+                                        <span class="fw-bold text-white fs-5">{{ p.username }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-4 text-center text-emerald fw-bold">₹{{ p.revenue | number:'1.2-2' }}</td>
+                                <td class="py-4 text-center text-rose opacity-75">₹{{ p.expense | number:'1.2-2' }}</td>
+                                <td class="py-4 text-end pe-5">
+                                    <span class="fs-5 fw-bold" [ngClass]="p.profit >= 0 ? 'text-emerald' : 'text-rose'">
+                                        ₹{{ p.profit | number:'1.2-2' }}
+                                    </span>
+                                    <i class="bi ms-2"
+                                        [ngClass]="p.profit >= 0 ? 'bi-caret-up-fill text-emerald' : 'bi-caret-down-fill text-rose'"></i>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

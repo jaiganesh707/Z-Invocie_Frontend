@@ -1,0 +1,14 @@
+.card-container.card {
+    max-width: 450px;
+    padding: 40px 40px;
+}
+
+.btn-primary {
+    background-color: #4f46e5;
+    border-color: #4f46e5;
+}
+
+.btn-primary:hover {
+    background-color: #4338ca;
+    border-color: #4338ca;
+}

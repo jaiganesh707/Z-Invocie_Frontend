@@ -1,0 +1,71 @@
+.navbar {
+    z-index: 1000;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.custom-link {
+    font-weight: 500;
+    color: var(--text-muted) !important;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.custom-link:hover {
+    color: var(--text-main) !important;
+    transform: translateY(-2px);
+}
+
+.custom-link.active {
+    color: var(--primary) !important;
+}
+
+.custom-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 15%;
+    width: 70%;
+    height: 3px;
+    background: linear-gradient(to right, var(--primary), var(--secondary));
+    border-radius: 10px;
+    box-shadow: 0 0 10px var(--primary-glow);
+}
+
+.btn-signup {
+    color: var(--text-main) !important;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-signup:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px var(--primary-glow);
+}
+
+.btn-login:hover {
+    background: var(--border-glass) !important;
+    transform: translateY(-2px);
+}
+
+.profile-link:hover {
+    background: var(--border-glass) !important;
+    border-color: var(--primary) !important;
+}
+
+.btn-logout:hover {
+    background: rgba(244, 63, 94, 0.1) !important;
+    border-color: var(--accent) !important;
+}
+
+
+@media (max-width: 991.98px) {
+    .navbar-collapse {
+        margin-top: 1rem;
+        background: var(--bg-card);
+        padding: 1.5rem;
+        border-radius: 16px;
+        border: 1px solid var(--border-glass);
+    }
+}

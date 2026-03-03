@@ -1,0 +1,80 @@
+<div class="row justify-content-center align-items-center min-vh-100 animate-slide">
+    <div class="col-xl-4 col-lg-5 col-md-7">
+        <div class="glass-card p-5 shadow-2xl">
+            <div class="text-center mb-5">
+                <div class="p-3 bg-info bg-opacity-10 rounded-circle d-inline-block mb-3">
+                    <i class="bi bi-person-plus-fill fs-1 text-info"></i>
+                </div>
+                <h2 class="display-6 fw-bold">Create Account</h2>
+                <p class="text-muted">Join the ZInvoice elite network</p>
+            </div>
+
+            <form *ngIf="!isSuccessful" name="form" (ngSubmit)="f.form.valid && onSubmit()" #f="ngForm" novalidate>
+                <div class="form-group mb-4">
+                    <label class="form-label text-muted small text-uppercase fw-bold ls-wide">Username</label>
+                    <div class="input-group glass rounded-3 overflow-hidden">
+                        <span class="input-group-text bg-transparent border-0 text-muted ps-3">
+                            <i class="bi bi-person"></i>
+                        </span>
+                        <input type="text" class="form-control bg-transparent border-0 text-white p-3 shadow-none"
+                            name="username" [(ngModel)]="form.username" required minlength="3" maxlength="20"
+                            #username="ngModel" [ngClass]="{ 'is-invalid': f.submitted && username.errors }"
+                            placeholder="Choose a unique handle" />
+                    </div>
+                    <div *ngIf="username.errors && f.submitted" class="text-danger small mt-2 animate-fade">
+                        <i class="bi bi-exclamation-circle me-1"></i> 3-20 characters required
+                    </div>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label class="form-label text-muted small text-uppercase fw-bold ls-wide">Email Address</label>
+                    <div class="input-group glass rounded-3 overflow-hidden">
+                        <span class="input-group-text bg-transparent border-0 text-muted ps-3">
+                            <i class="bi bi-envelope"></i>
+                        </span>
+                        <input type="email" class="form-control bg-transparent border-0 text-white p-3 shadow-none"
+                            name="email" [(ngModel)]="form.email" required email #email="ngModel"
+                            [ngClass]="{ 'is-invalid': f.submitted && email.errors }" placeholder="your@email.com" />
+                    </div>
+                    <div *ngIf="email.errors && f.submitted" class="text-danger small mt-2 animate-fade">
+                        <i class="bi bi-exclamation-circle me-1"></i> Valid email required
+                    </div>
+                </div>
+
+                <div class="form-group mb-5">
+                    <label class="form-label text-muted small text-uppercase fw-bold ls-wide">Password</label>
+                    <div class="input-group glass rounded-3 overflow-hidden">
+                        <span class="input-group-text bg-transparent border-0 text-muted ps-3">
+                            <i class="bi bi-key"></i>
+                        </span>
+                        <input type="password" class="form-control bg-transparent border-0 text-white p-3 shadow-none"
+                            name="password" [(ngModel)]="form.password" required minlength="6" #password="ngModel"
+                            [ngClass]="{ 'is-invalid': f.submitted && password.errors }"
+                            placeholder="Minimum 6 characters" />
+                    </div>
+                    <div *ngIf="password.errors && f.submitted" class="text-danger small mt-2 animate-fade">
+                        <i class="bi bi-exclamation-circle me-1"></i> Security key too short
+                    </div>
+                </div>
+
+                <button class="btn-premium w-100 py-3 fs-5 shadow-lg">
+                    Registry Account <i class="bi bi-check-circle ms-2"></i>
+                </button>
+
+                <div class="text-center mt-4">
+                    <p class="text-muted small">Already a member? <a routerLink="/login"
+                            class="text-primary text-decoration-none fw-bold">Login here</a></p>
+                </div>
+            </form>
+
+            <div class="text-center py-4 animate-fade" *ngIf="isSuccessful">
+                <div class="p-3 bg-success bg-opacity-10 rounded-circle d-inline-block mb-3">
+                    <i class="bi bi-person-check fs-1 text-success"></i>
+                </div>
+                <h4 class="text-white">Registration Complete</h4>
+                <p class="text-muted">Welcome to the future of invoicing.</p>
+                <a routerLink="/login" class="btn btn-premium mt-3 w-100">Proceed to Login</a>
+            </div>
+        </div>
+    </div>
+</div>

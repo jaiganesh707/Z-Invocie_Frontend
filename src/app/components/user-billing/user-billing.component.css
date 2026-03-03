@@ -1,0 +1,187 @@
+.hover-lift {
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.hover-lift:hover {
+    transform: translateY(-10px) scale(1.02) !important;
+    border-color: var(--primary-bright) !important;
+}
+
+.catalog-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 24px;
+    border: 1px solid var(--glass-border);
+    padding: 1.5rem;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--glass-inner-glow);
+    min-height: 520px;
+    /* Force minimum height for consistent geometry */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Commit to Ledger Button Refinement */
+.commit-to-ledger {
+    background: linear-gradient(135deg, #10b981, #059669);
+    border-radius: 50px !important;
+    border: none;
+    color: white;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    padding: 12px 24px !important;
+    width: 100%;
+    margin-top: auto;
+    box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2);
+    transition: all 0.3s ease;
+}
+
+.commit-to-ledger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(16, 185, 129, 0.4);
+    background: linear-gradient(135deg, #34d399, #10b981);
+}
+
+.quantity-selector {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50px;
+    padding: 6px 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+    align-self: flex-start;
+}
+
+.quantity-selector:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.quantity-btn {
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    padding: 0;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.quantity-btn:hover {
+    color: var(--primary);
+}
+
+.catalog-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    background: rgba(255, 255, 255, 0.07);
+    border-color: var(--primary-bright);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(16, 185, 129, 0.1);
+}
+
+.glass-reflection {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right,
+            transparent,
+            rgba(255, 255, 255, 0.1),
+            transparent);
+    transform: skewX(-25deg);
+    transition: left 0.7s;
+}
+
+.catalog-card:hover .glass-reflection {
+    left: 150%;
+}
+
+.asset-icon-box {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(16, 185, 129, 0.05);
+    border: 1px solid rgba(16, 185, 129, 0.1);
+    transition: all 0.3s;
+    overflow: hidden;
+}
+
+.catalog-card:hover .asset-icon-box {
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.catalog-card img {
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.catalog-card:hover img {
+    transform: scale(1.15);
+}
+
+.bg-glass-hover:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.ls-wide {
+    letter-spacing: 0.1em;
+}
+
+.printable-content {
+    border-radius: 0 0 20px 20px;
+}
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .only-print {
+        display: block !important;
+    }
+
+    body {
+        background: white !important;
+        color: black !important;
+    }
+
+    .printable-content {
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+
+    .glass-card {
+        border: none !important;
+        background: transparent !important;
+    }
+}
+
+.only-print {
+    display: none;
+}
+
+.qty-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--primary-glow);
+}
+
+.selected-items-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.selected-items-list::-webkit-scrollbar-thumb {
+    background: var(--border-glass);
+    border-radius: 10px;
+}
