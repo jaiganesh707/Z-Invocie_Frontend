@@ -10,7 +10,7 @@ export class UserService {
     private BASE_URL = environment.apiUrl;
 
     private usersSubject = new BehaviorSubject<any[]>([]);
-    public users$ = this.usersSubject.asObservable().pipe(shareReplay(1));
+    public users$ = this.usersSubject.asObservable();
 
     private rolesSubject = new BehaviorSubject<any[]>([]);
     public roles$ = this.rolesSubject.asObservable().pipe(shareReplay(1));
@@ -53,19 +53,32 @@ export class UserService {
 
     createUser(user: any): Observable<any> {
         return this.http.post(this.BASE_URL + '/users', user).pipe(
-            tap(() => this.reloadUsers().subscribe())
+            tap(newUser => {
+                const currentUsers = this.usersSubject.value;
+                this.usersSubject.next([...currentUsers, newUser]);
+            })
         );
     }
 
     updateUser(id: number, user: any): Observable<any> {
         return this.http.put(`${this.BASE_URL}/users/${id}`, user).pipe(
-            tap(() => this.reloadUsers().subscribe())
+            tap(updatedUser => {
+                const currentUsers = this.usersSubject.value;
+                const index = currentUsers.findIndex(u => u.id === id);
+                if (index !== -1) {
+                    currentUsers[index] = { ...currentUsers[index], ...updatedUser };
+                    this.usersSubject.next([...currentUsers]);
+                }
+            })
         );
     }
 
     deleteUser(id: number): Observable<any> {
         return this.http.delete(`${this.BASE_URL}/users/${id}`).pipe(
-            tap(() => this.reloadUsers().subscribe())
+            tap(() => {
+                const currentUsers = this.usersSubject.value;
+                this.usersSubject.next(currentUsers.filter(u => u.id !== id));
+            })
         );
     }
 
@@ -73,7 +86,14 @@ export class UserService {
         const formData = new FormData();
         formData.append('file', file);
         return this.http.post(`${this.BASE_URL}/users/${id}/image`, formData).pipe(
-            tap(() => this.reloadUsers().subscribe())
+            tap(updatedUser => {
+                const currentUsers = this.usersSubject.value;
+                const index = currentUsers.findIndex(u => u.id === id);
+                if (index !== -1) {
+                    currentUsers[index] = { ...currentUsers[index], ...updatedUser };
+                    this.usersSubject.next([...currentUsers]);
+                }
+            })
         );
     }
 

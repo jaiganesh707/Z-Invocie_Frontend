@@ -16,11 +16,16 @@ export class InvoiceService {
         return this.http.post<Invoice>(API_URL, data);
     }
 
-    getByUser(userId: number): Observable<Invoice[]> {
-        return this.http.get<Invoice[]>(`${API_URL}/user/${userId}`);
-    }
 
     getAll(): Observable<Invoice[]> {
         return this.http.get<Invoice[]>(API_URL);
+    }
+
+    getByUser(userId: number, startDate?: string, endDate?: string): Observable<Invoice[]> {
+        let params = '';
+        if (startDate && endDate) {
+            params = `?startDate=${startDate}&endDate=${endDate}`;
+        }
+        return this.http.get<Invoice[]>(`${API_URL}/user/${userId}${params}`);
     }
 }

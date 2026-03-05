@@ -62,19 +62,41 @@ export class FoodItemService {
             url += `?userId=${userId}`;
         }
         return this.http.post<FoodItem>(url, data).pipe(
-            tap(() => this.reloadAll(userId))
+            tap(newItem => {
+                const currentItems = this.foodItemsSubject.value;
+                const updatedItems = [...currentItems, newItem];
+                this.foodItemsSubject.next(updatedItems);
+                const cacheKey = userId ? `${this.CACHE_KEY}_${userId}` : this.CACHE_KEY;
+                this.cacheService.set(cacheKey, updatedItems);
+            })
         );
     }
 
     update(id: number, data: FoodItem, userId?: number): Observable<FoodItem> {
         return this.http.put<FoodItem>(`${API_URL}/${id}`, data).pipe(
-            tap(() => this.reloadAll(userId))
+            tap(updatedItem => {
+                const currentItems = this.foodItemsSubject.value;
+                const index = currentItems.findIndex(item => item.id === id);
+                if (index !== -1) {
+                    currentItems[index] = { ...currentItems[index], ...updatedItem };
+                    const updatedItems = [...currentItems];
+                    this.foodItemsSubject.next(updatedItems);
+                    const cacheKey = userId ? `${this.CACHE_KEY}_${userId}` : this.CACHE_KEY;
+                    this.cacheService.set(cacheKey, updatedItems);
+                }
+            })
         );
     }
 
     delete(id: number, userId?: number): Observable<any> {
         return this.http.delete(`${API_URL}/${id}`).pipe(
-            tap(() => this.reloadAll(userId))
+            tap(() => {
+                const currentItems = this.foodItemsSubject.value;
+                const updatedItems = currentItems.filter(item => item.id !== id);
+                this.foodItemsSubject.next(updatedItems);
+                const cacheKey = userId ? `${this.CACHE_KEY}_${userId}` : this.CACHE_KEY;
+                this.cacheService.set(cacheKey, updatedItems);
+            })
         );
     }
 
@@ -86,7 +108,17 @@ export class FoodItemService {
             url += `?userId=${userId}`;
         }
         return this.http.post<FoodItem>(url, formData).pipe(
-            tap(() => this.reloadAll(userId))
+            tap(updatedItem => {
+                const currentItems = this.foodItemsSubject.value;
+                const index = currentItems.findIndex(item => item.id === id);
+                if (index !== -1) {
+                    currentItems[index] = { ...currentItems[index], ...updatedItem };
+                    const updatedItems = [...currentItems];
+                    this.foodItemsSubject.next(updatedItems);
+                    const cacheKey = userId ? `${this.CACHE_KEY}_${userId}` : this.CACHE_KEY;
+                    this.cacheService.set(cacheKey, updatedItems);
+                }
+            })
         );
     }
 }

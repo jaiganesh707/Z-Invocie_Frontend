@@ -143,6 +143,40 @@ import { takeUntil } from 'rxjs/operators';
     .catalog-card:hover img {
       transform: scale(1.15);
     }
+    .bg-glass {
+      background: rgba(255, 255, 255, 0.03) !important;
+      backdrop-filter: blur(10px);
+    }
+    .border-glass {
+      border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+    .shadow-inner {
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    .focus-none:focus {
+      outline: none;
+      box-shadow: none;
+    }
+    .bg-emerald-soft {
+      background: rgba(16, 185, 129, 0.1);
+    }
+    .text-rose {
+      color: #fb7185;
+    }
+    .ls-wide {
+      letter-spacing: 0.1em;
+    }
+    .fw-600 {
+      font-weight: 600;
+    }
+    .table-dark {
+      --bs-table-bg: transparent;
+      --bs-table-border-color: rgba(255, 255, 255, 0.05);
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(100deg);
+      cursor: pointer;
+    }
   `]
 })
 export class StakeholderHubComponent implements OnInit, OnDestroy {
@@ -151,8 +185,13 @@ export class StakeholderHubComponent implements OnInit, OnDestroy {
     activeTab = signal<string>('analytics');
     isAdding = signal<boolean>(false);
 
-    foodItems = signal<FoodItem[]>([]);
+    // Billing Archive State
+    startDate = signal<string>('');
+    endDate = signal<string>('');
     invoices = signal<Invoice[]>([]);
+    isLoadingInvoices = signal<boolean>(false);
+
+    foodItems = signal<FoodItem[]>([]);
     private destroy$ = new Subject<void>();
 
     // Service Config Mock
@@ -190,7 +229,7 @@ export class StakeholderHubComponent implements OnInit, OnDestroy {
                 this.userId.set(+id);
                 this.fetchUser();
                 this.fetchCatalog();
-                this.fetchActivity();
+                this.fetchInvoices();
             }
         });
 
@@ -199,7 +238,6 @@ export class StakeholderHubComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this.destroy$))
             .subscribe(() => {
                 this.fetchCatalog();
-                this.fetchActivity();
             });
     }
 
@@ -221,19 +259,46 @@ export class StakeholderHubComponent implements OnInit, OnDestroy {
         });
     }
 
-    fetchActivity() {
-        this.invoiceService.getByUser(this.userId()).subscribe({
-            next: (data) => this.invoices.set(data),
-            error: () => this.toastService.show('Failed to fetch user activity', 'error')
+    fetchInvoices() {
+        this.isLoadingInvoices.set(true);
+        let startIso = '';
+        let endIso = '';
+
+        if (this.startDate() && this.endDate()) {
+            startIso = `${this.startDate()}T00:00:00`;
+            endIso = `${this.endDate()}T23:59:59`;
+        }
+
+        this.invoiceService.getByUser(this.userId(), startIso, endIso).subscribe({
+            next: (data) => {
+                this.invoices.set(data);
+                this.isLoadingInvoices.set(false);
+            },
+            error: () => {
+                this.toastService.show('Failed to fetch billing archive', 'error');
+                this.isLoadingInvoices.set(false);
+            }
         });
     }
 
+    applyFilters() {
+        if (this.startDate() && !this.endDate()) return;
+        if (!this.startDate() && this.endDate()) return;
+        this.fetchInvoices();
+    }
+
+    clearFilters() {
+        this.startDate.set('');
+        this.endDate.set('');
+        this.fetchInvoices();
+    }
+
+
     setTab(tab: string) {
-        if (tab === 'billing') {
-            this.router.navigate(['/user-billing', this.userId()]);
-            return;
-        }
         this.activeTab.set(tab);
+        if (tab === 'billing') {
+            this.fetchInvoices();
+        }
     }
 
     updateConfig() {

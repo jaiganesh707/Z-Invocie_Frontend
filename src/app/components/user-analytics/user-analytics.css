@@ -138,6 +138,77 @@
     filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.2));
 }
 
+/* Strategic Intelligence Styles */
+.strategic-card {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border-radius: 20px;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    padding: 1.5rem;
+    height: 100%;
+    transition: all 0.4s ease;
+}
+
+.strategic-card:hover {
+    border-color: rgba(16, 185, 129, 0.5);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+    transform: translateY(-5px);
+}
+
+.score-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+}
+
+.prediction-item {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 16px;
+    padding: 1.25rem;
+    border-left: 4px solid var(--primary);
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.prediction-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-left-width: 8px;
+}
+
+.intelligence-header {
+    background: rgba(16, 185, 129, 0.05);
+    padding: 1.5rem 2rem;
+    border-radius: 24px;
+    border: 1px solid rgba(16, 185, 129, 0.1);
+    margin-bottom: 2.5rem;
+}
+
+.confidence-bar {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.confidence-fill {
+    height: 100%;
+    background: var(--primary);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+.table-horizontal-spacing th,
+.table-horizontal-spacing td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
 .table-glass {
     background: transparent;
 }

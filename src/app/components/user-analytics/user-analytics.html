@@ -1,20 +1,29 @@
 <div class="container-fluid py-4 min-vh-100">
     <!-- Premium Header -->
-    <header class="mb-5 animate-fade" *ngIf="!inputUserId">
-        <div class="d-flex align-items-center mb-2">
-            <div class="badge glass border-emerald text-emerald me-3 px-3 py-2">
-                <i class="bi bi-shield-shaded me-2"></i> SECURE TERMINAL
+    <header class="mb-5 animate-fade d-flex justify-content-between align-items-end">
+        <div class="flex-grow-1">
+            <div class="d-flex align-items-center mb-2">
+                <div class="badge glass border-emerald text-emerald me-3 px-3 py-2">
+                    <i class="bi bi-shield-shaded me-2"></i> SECURE TERMINAL
+                </div>
+                <span class="text-emerald small ls-wide">REAL-TIME DATA STREAM</span>
             </div>
-            <span class="text-muted small ls-wide">REAL-TIME DATA STREAM</span>
+            <h2 class="display-5 fw-bold text-gradient mb-0 ls-tight">Analytics & Insights Terminal</h2>
+            <p class="text-gradient opacity-75 mb-0">Sophisticated performance monitoring for Client #{{ userId }}</p>
         </div>
-        <h2 class="display-5 fw-bold text-gradient mb-0 ls-tight">Analytics & Insights Terminal</h2>
-        <p class="text-muted opacity-75">Sophisticated performance monitoring for Client #{{ userId }}</p>
+        <div>
+            <button class="btn glass border-emerald text-emerald px-4 py-2 rounded-pill hover-lift shadow-sm"
+                (click)="refreshData()" [disabled]="isLoading">
+                <i class="bi bi-arrow-clockwise me-2" [class.animate-spin]="isLoading"></i>
+                {{ isLoading ? 'SYNCHRONIZING...' : 'REFRESH DATA' }}
+            </button>
+        </div>
     </header>
 
     <!-- Loading State -->
     <div *ngIf="isLoading" class="d-flex flex-column justify-content-center align-items-center" style="height: 400px;">
         <div class="spinner-grow text-emerald mb-3" role="status"></div>
-        <span class="text-muted ls-wide small">SYNCHRONIZING PORTFOLIO...</span>
+        <span class="text-white ls-wide small">SYNCHRONIZING PORTFOLIO...</span>
     </div>
 
     <div *ngIf="!isLoading && analyticsData" class="animate-fade">
@@ -31,10 +40,10 @@
                             analyticsData.todayTotalTransactions }} New</div>
                     </div>
                     <div class="mb-1">
-                        <span class="text-muted ls-wide text-uppercase small opacity-75">Daily Gross Assets</span>
+                        <span class="text-white ls-wide text-uppercase small opacity-75">Daily Gross Assets</span>
                     </div>
                     <div class="d-flex align-items-baseline">
-                        <h2 class="display-6 fw-bold mb-0 text-white">₹{{ analyticsData.todayRevenue | number:'1.2-2' }}
+                        <h2 class="display-6 fw-bold mb-0 text-emerald">₹{{ analyticsData.todayRevenue | number:'1.2-2' }}
                         </h2>
                     </div>
                 </div>
@@ -50,7 +59,7 @@
                         <div class="badge glass text-primary rounded-pill border-primary-soft">Live Burn</div>
                     </div>
                     <div class="mb-1">
-                        <span class="text-muted ls-wide text-uppercase small opacity-75">Today's Burn Rate</span>
+                        <span class="text-white ls-wide text-uppercase small opacity-75">Today's Burn Rate</span>
                     </div>
                     <h2 class="display-6 fw-bold mb-0 text-white">₹{{ analyticsData.todayExpense | number:'1.2-2' }}
                     </h2>
@@ -71,7 +80,7 @@
                             [ngClass]="analyticsData.todayProfit >= 0 ? 'bi-arrow-up-right text-emerald' : 'bi-arrow-down-right text-danger'"></i>
                     </div>
                     <div class="mb-1">
-                        <span class="text-muted ls-wide text-uppercase small opacity-75">Net Profit Velocity</span>
+                        <span class="text-white ls-wide text-uppercase small opacity-75">Net Profit Velocity</span>
                     </div>
                     <h2 class="display-6 fw-bold mb-0"
                         [ngClass]="analyticsData.todayProfit >= 0 ? 'text-emerald' : 'text-danger'">
@@ -91,15 +100,106 @@
                             *ngIf="analyticsData.bestMovingProduct">TOP MOVER</div>
                     </div>
                     <div class="mb-1">
-                        <span class="text-muted ls-wide text-uppercase small opacity-75">Prime Mover</span>
+                        <span class="text-gradient ls-wide text-uppercase small opacity-75">Prime Mover</span>
                     </div>
                     <h2 class="h3 fw-bold mb-1 text-white ls-tight" *ngIf="analyticsData.bestMovingProduct">
                         {{ analyticsData.bestMovingProduct.name }}
                     </h2>
-                    <p class="text-muted small mb-0 opacity-75" *ngIf="analyticsData.bestMovingProduct">
+                    <p class="text-emerald small mb-0 opacity-75" *ngIf="analyticsData.bestMovingProduct">
                         {{ analyticsData.bestMovingProduct.quantity }} units in circulation
                     </p>
-                    <h2 class="h3 fw-bold mb-0 text-muted" *ngIf="!analyticsData.bestMovingProduct">No Velocity</h2>
+                    <h2 class="h3 fw-bold mb-0 text-white" *ngIf="!analyticsData.bestMovingProduct">No Velocity</h2>
+                </div>
+            </div>
+        </div>
+
+        <!-- Strategic Intelligence Section -->
+        <div class="intelligence-header d-flex justify-content-between align-items-center animate-fade"
+            style="animation-delay: 0.2s">
+            <div class="d-flex align-items-center">
+                <div class="icon-box bg-emerald bg-opacity-10 me-3">
+                    <i class="bi bi-cpu text-emerald"></i>
+                </div>
+                <div>
+                    <h4 class="text-white mb-0 ls-tight">Strategic Node Intelligence</h4>
+                    <p class="text-gradient small mb-0 opacity-75">Advanced heuristic analysis and predictive performance
+                        modeling</p>
+                </div>
+            </div>
+            <div class="badge glass border-emerald text-emerald rounded-pill px-4">AI ENGINE ACTIVE</div>
+        </div>
+
+        <div class="row g-4 mb-5 animate-fade" style="animation-delay: 0.3s">
+            <!-- Strategic Advantages -->
+            <div class="col-lg-8">
+                <div class="glass-card p-5 h-100">
+                    <h5 class="mb-4 text-white ls-wide text-uppercase small opacity-75">
+                        <i class="bi bi-stars text-emerald me-2"></i> Competitive Advantages
+                    </h5>
+                    <div class="row g-3"
+                        *ngIf="analyticsData.strategicAdvantages && analyticsData.strategicAdvantages.length > 0">
+                        <div class="col-md-6" *ngFor="let adv of analyticsData.strategicAdvantages">
+                            <div class="strategic-card">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div class="icon-box bg-emerald bg-opacity-10" style="width: 40px; height: 40px;">
+                                        <i
+                                            [class]="'bi ' + getAdvantageIcon(adv.advantageType) + ' text-emerald fs-5'"></i>
+                                    </div>
+                                    <div class="score-dot">{{ adv.score | number:'1.0-0' }}</div>
+                                </div>
+                                <h6 class="text-white fw-bold mb-1">{{ adv.assetName }}</h6>
+                                <div class="badge bg-emerald bg-opacity-10 text-emerald mb-2"
+                                    style="font-size: 0.7rem;">{{ adv.advantageType }}</div>
+                                <p class="text-muted small mb-0">{{ adv.description }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Empty State for Advantages -->
+                    <div *ngIf="!analyticsData.strategicAdvantages || analyticsData.strategicAdvantages.length === 0"
+                        class="d-flex flex-column align-items-center justify-content-center py-5 opacity-50">
+                        <i class="bi bi-robot fs-1 mb-3"></i>
+                        <p class="small ls-wide">AWAITING HEURISTIC ENGINE CALIBRATION</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Future Projections -->
+            <div class="col-lg-4">
+                <div class="glass-card p-5 h-100">
+                    <h5 class="mb-4 text-white ls-wide text-uppercase small opacity-75">
+                        <i class="bi bi-crystal-ball text-emerald me-2"></i> Performance Projections
+                    </h5>
+                    <div class="prediction-list"
+                        *ngIf="analyticsData.predictions && analyticsData.predictions.length > 0">
+                        <div class="prediction-item" *ngFor="let pred of analyticsData.predictions">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-white fw-bold small">{{ pred.assetName }}</span>
+                                <i class="bi bi-graph-up-arrow fs-5 text-emerald"
+                                    [class.bi-graph-up-arrow]="pred.trend === 'UP'"
+                                    [class.bi-dash-lg]="pred.trend === 'STABLE'"></i>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-baseline">
+                                <span class="text-gradient small">Expectation</span>
+                                <span class="text-emerald fw-bold fs-5">₹{{ pred.predictedNextPeriodRevenue |
+                                    number:'1.2-2' }}</span>
+                            </div>
+                            <div class="confidence-container mt-3">
+                                <div class="d-flex justify-content-between small opacity-50 mb-1">
+                                    <span style="font-size: 0.7rem">CONFIDENCE</span>
+                                    <span style="font-size: 0.7rem">{{ pred.confidence * 100 | number:'1.0-0' }}%</span>
+                                </div>
+                                <div class="confidence-bar">
+                                    <div class="confidence-fill" [style.width]="(pred.confidence * 100) + '%'"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Empty State for Projections -->
+                    <div *ngIf="!analyticsData.predictions || analyticsData.predictions.length === 0"
+                        class="d-flex flex-column align-items-center justify-content-center py-5 opacity-50">
+                        <i class="bi bi-activity fs-1 mb-3"></i>
+                        <p class="small ls-wide text-center">INSUFFICIENT HISTORICAL DATA<br>FOR PROJECTION MODELING</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -114,8 +214,13 @@
                         </div>
                         <h4 class="mb-0 text-white ls-tight">Asset Growth & Performance Architecture</h4>
                     </div>
-                    <div class="chart-container" style="height:350px;">
-                        <canvas #barChart></canvas>
+                    <div class="chart-container" style="min-height:350px;">
+                        <canvas #barChart *ngIf="analyticsData.productSalesStats.length > 0"></canvas>
+                        <div *ngIf="analyticsData.productSalesStats.length === 0"
+                            class="d-flex flex-column align-items-center justify-content-center h-100 opacity-25 py-5">
+                            <i class="bi bi-bar-chart fs-1 mb-3"></i>
+                            <p class="ls-wide small">NO ASSET CIRCULATION DETECTED</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -123,8 +228,12 @@
             <div class="col-lg-6">
                 <div class="glass-card p-5">
                     <h5 class="mb-5 text-white ls-wide text-uppercase small opacity-75">Revenue Distribution</h5>
-                    <div class="chart-container" style="height:300px;">
-                        <canvas #pieChart></canvas>
+                    <div class="chart-container" style="min-height:300px;">
+                        <canvas #pieChart *ngIf="analyticsData.productSalesStats.length > 0"></canvas>
+                        <div *ngIf="analyticsData.productSalesStats.length === 0"
+                            class="d-flex flex-column align-items-center justify-content-center h-100 opacity-25">
+                            <i class="bi bi-pie-chart fs-1 mb-3"></i>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -132,8 +241,12 @@
             <div class="col-lg-6">
                 <div class="glass-card p-5">
                     <h5 class="mb-5 text-white ls-wide text-uppercase small opacity-75">Burn Distribution</h5>
-                    <div class="chart-container" style="height:300px;">
-                        <canvas #expenseChart></canvas>
+                    <div class="chart-container" style="min-height:300px;">
+                        <canvas #expenseChart *ngIf="analyticsData.expenseStats.length > 0"></canvas>
+                        <div *ngIf="analyticsData.expenseStats.length === 0"
+                            class="d-flex flex-column align-items-center justify-content-center h-100 opacity-25">
+                            <i class="bi bi-pie-chart fs-1 mb-3"></i>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -154,21 +267,28 @@
                             <th class="py-4 text-end pe-5 ls-wide small">REALIZED REVENUE</th>
                         </tr>
                     </thead>
-                    <tbody class="border-top-0">
+                    <tbody class="border-top-0" *ngIf="analyticsData.productSalesStats.length > 0">
                         <tr *ngFor="let stat of analyticsData.productSalesStats" class="border-glass">
                             <td class="ps-5 py-4">
                                 <div class="fw-bold text-white fs-5">{{ stat.productName }}</div>
-                                <div class="text-muted small opacity-50">#PN-{{
+                                <div class="text-gradient small opacity-50">#PN-{{
                                     stat.productName.substring(0,3).toUpperCase() }}</div>
                             </td>
                             <td class="py-4 text-center">
                                 <span
-                                    class="badge rounded-pill bg-emerald bg-opacity-10 text-emerald border border-emerald-soft px-3 py-2">
+                                    class="badge rounded-pill bg-emerald bg-opacity-10 text-white border border-emerald-soft px-3 py-2">
                                     {{ stat.quantity }} Units Distributed
                                 </span>
                             </td>
                             <td class="py-4 text-end pe-5">
                                 <span class="fw-bold text-white fs-5">₹{{ stat.revenue | number:'1.2-2' }}</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tbody *ngIf="analyticsData.productSalesStats.length === 0">
+                        <tr>
+                            <td colspan="3" class="text-center py-5 opacity-50">
+                                <p class="mb-0 ls-wide small">NO ASSET RECORDS FOUND IN ARCHIVE</p>
                             </td>
                         </tr>
                     </tbody>
