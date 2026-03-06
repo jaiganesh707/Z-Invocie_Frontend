@@ -145,8 +145,8 @@ export class AnalyticsDashboardComponent implements OnInit {
             .subscribe({
                 next: (data) => {
                     this.performanceData = data;
-                    this.updateChart();
                     this.isLoading = false;
+                    this.updateChart();
                 },
                 error: (err) => {
                     this.toastService.show('Failed to fetch performance analytics', 'error');

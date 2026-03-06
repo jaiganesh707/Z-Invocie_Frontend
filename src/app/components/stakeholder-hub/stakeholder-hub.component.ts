@@ -13,12 +13,12 @@ import { interval, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
-    // ... (omitted selector and templates for brevity as they are unchanged)
-    selector: 'app-stakeholder-hub',
-    standalone: true,
-    imports: [CommonModule, FormsModule, RouterModule, UserAnalyticsComponent],
-    templateUrl: './stakeholder-hub.component.html',
-    styles: [`
+  // ... (omitted selector and templates for brevity as they are unchanged)
+  selector: 'app-stakeholder-hub',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterModule, UserAnalyticsComponent],
+  templateUrl: './stakeholder-hub.component.html',
+  styles: [`
     .hub-container {
       background: var(--glass-bg);
       backdrop-filter: var(--glass-blur);
@@ -180,222 +180,222 @@ import { takeUntil } from 'rxjs/operators';
   `]
 })
 export class StakeholderHubComponent implements OnInit, OnDestroy {
-    userId = signal<number>(0);
-    user: any = null;
-    activeTab = signal<string>('analytics');
-    isAdding = signal<boolean>(false);
+  userId = signal<number>(0);
+  user: any = null;
+  activeTab = signal<string>('analytics');
+  isAdding = signal<boolean>(false);
 
-    // Billing Archive State
-    startDate = signal<string>('');
-    endDate = signal<string>('');
-    invoices = signal<Invoice[]>([]);
-    isLoadingInvoices = signal<boolean>(false);
+  // Billing Archive State
+  startDate = signal<string>('');
+  endDate = signal<string>('');
+  invoices = signal<Invoice[]>([]);
+  isLoadingInvoices = signal<boolean>(false);
 
-    foodItems = signal<FoodItem[]>([]);
-    private destroy$ = new Subject<void>();
+  foodItems = signal<FoodItem[]>([]);
+  private destroy$ = new Subject<void>();
 
-    // Service Config Mock
-    serviceConfig = {
-        taxRate: 18,
-        currency: 'INR',
-        autoInvoicing: true
+  // Service Config Mock
+  serviceConfig = {
+    taxRate: 18,
+    currency: 'INR',
+    autoInvoicing: true
+  };
+
+  newFoodItem: FoodItem = { name: '', price: 0, description: '', currency: 'INR' };
+  isEditing = false;
+  editingId: number | null = null;
+  selectedFile: File | null = null;
+
+  onFileSelected(event: any) {
+    this.selectedFile = event.target.files[0] as File;
+    if (this.selectedFile) {
+      this.newFoodItem.imageUrl = ''; // Clear URL mode when file is selected
+    }
+  }
+
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private userService: UserService,
+    private foodItemService: FoodItemService,
+    private invoiceService: InvoiceService,
+    private toastService: ToastService
+  ) { }
+
+  ngOnInit(): void {
+    this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
+      const id = params['userId'];
+      if (id) {
+        this.userId.set(+id);
+        this.fetchUser();
+        this.fetchCatalog();
+        // Removed fetchInvoices from here to prevent redundant calling on init
+      }
+    });
+
+    // Polling every 30 seconds for catalog and activity
+    interval(30000)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.fetchCatalog();
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  fetchUser() {
+    this.userService.users$.subscribe(users => {
+      this.user = users.find(u => u.id === this.userId());
+    });
+  }
+
+  fetchCatalog() {
+    this.foodItemService.getAll(this.userId()).subscribe({
+      next: (items) => this.foodItems.set(items),
+      error: () => this.toastService.show('Failed to fetch user catalog', 'error')
+    });
+  }
+
+  fetchInvoices() {
+    this.isLoadingInvoices.set(true);
+    let startIso = '';
+    let endIso = '';
+
+    if (this.startDate() && this.endDate()) {
+      startIso = `${this.startDate()}T00:00:00`;
+      endIso = `${this.endDate()}T23:59:59`;
+    }
+
+    this.invoiceService.getByUser(this.userId(), startIso, endIso).subscribe({
+      next: (data) => {
+        this.invoices.set(data);
+        this.isLoadingInvoices.set(false);
+      },
+      error: () => {
+        this.toastService.show('Failed to fetch billing archive', 'error');
+        this.isLoadingInvoices.set(false);
+      }
+    });
+  }
+
+  applyFilters() {
+    if (this.startDate() && !this.endDate()) return;
+    if (!this.startDate() && this.endDate()) return;
+    this.fetchInvoices();
+  }
+
+  clearFilters() {
+    this.startDate.set('');
+    this.endDate.set('');
+    this.fetchInvoices();
+  }
+
+
+  setTab(tab: string) {
+    this.activeTab.set(tab);
+    if (tab === 'billing') {
+      this.fetchInvoices();
+    }
+  }
+
+  updateConfig() {
+    this.toastService.show('Billing configuration updated for user', 'success');
+  }
+
+  printInvoice(invoice: Invoice) {
+    window.print();
+  }
+
+  addFoodItem() {
+    if (!this.newFoodItem.name || this.newFoodItem.price < 0) {
+      this.toastService.show('Please provide valid name and valuation', 'warning');
+      return;
+    }
+
+    // Auto-assign currency if missing
+    this.newFoodItem.currency = this.newFoodItem.currency || 'INR';
+
+    const handleImageUpload = (id: number) => {
+      if (this.selectedFile) {
+        this.foodItemService.uploadImage(id, this.selectedFile, this.userId()).subscribe({
+          next: () => {
+            this.toastService.show('Image uploaded successfully', 'success');
+            this.resetForm();
+            this.fetchCatalog();
+          },
+          error: () => {
+            this.toastService.show('Image upload failed', 'error');
+            this.resetForm();
+            this.fetchCatalog();
+          }
+        });
+      } else {
+        this.resetForm();
+        this.fetchCatalog();
+      }
     };
 
-    newFoodItem: FoodItem = { name: '', price: 0, description: '', currency: 'INR' };
-    isEditing = false;
-    editingId: number | null = null;
-    selectedFile: File | null = null;
-
-    onFileSelected(event: any) {
-        this.selectedFile = event.target.files[0] as File;
-        if (this.selectedFile) {
-            this.newFoodItem.imageUrl = ''; // Clear URL mode when file is selected
+    if (this.isEditing && this.editingId) {
+      this.foodItemService.update(this.editingId, this.newFoodItem, this.userId()).subscribe({
+        next: () => {
+          this.toastService.show('Food item updated successfully', 'success');
+          handleImageUpload(this.editingId!);
+          this.isAdding.set(false);
         }
-    }
-
-    constructor(
-        private route: ActivatedRoute,
-        private router: Router,
-        private userService: UserService,
-        private foodItemService: FoodItemService,
-        private invoiceService: InvoiceService,
-        private toastService: ToastService
-    ) { }
-
-    ngOnInit(): void {
-        this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
-            const id = params['userId'];
-            if (id) {
-                this.userId.set(+id);
-                this.fetchUser();
-                this.fetchCatalog();
-                this.fetchInvoices();
-            }
-        });
-
-        // Polling every 30 seconds for catalog and activity
-        interval(30000)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe(() => {
-                this.fetchCatalog();
-            });
-    }
-
-    ngOnDestroy(): void {
-        this.destroy$.next();
-        this.destroy$.complete();
-    }
-
-    fetchUser() {
-        this.userService.users$.subscribe(users => {
-            this.user = users.find(u => u.id === this.userId());
-        });
-    }
-
-    fetchCatalog() {
-        this.foodItemService.getAll(this.userId()).subscribe({
-            next: (items) => this.foodItems.set(items),
-            error: () => this.toastService.show('Failed to fetch user catalog', 'error')
-        });
-    }
-
-    fetchInvoices() {
-        this.isLoadingInvoices.set(true);
-        let startIso = '';
-        let endIso = '';
-
-        if (this.startDate() && this.endDate()) {
-            startIso = `${this.startDate()}T00:00:00`;
-            endIso = `${this.endDate()}T23:59:59`;
+      });
+    } else {
+      this.foodItemService.create(this.newFoodItem, this.userId()).subscribe({
+        next: (createdItem) => {
+          this.toastService.show('New food item added to user catalog', 'success');
+          if (createdItem.id) {
+            handleImageUpload(createdItem.id);
+            this.isAdding.set(false);
+          } else {
+            this.resetForm();
+            this.fetchCatalog();
+            this.isAdding.set(false);
+          }
         }
-
-        this.invoiceService.getByUser(this.userId(), startIso, endIso).subscribe({
-            next: (data) => {
-                this.invoices.set(data);
-                this.isLoadingInvoices.set(false);
-            },
-            error: () => {
-                this.toastService.show('Failed to fetch billing archive', 'error');
-                this.isLoadingInvoices.set(false);
-            }
-        });
+      });
     }
+  }
 
-    applyFilters() {
-        if (this.startDate() && !this.endDate()) return;
-        if (!this.startDate() && this.endDate()) return;
-        this.fetchInvoices();
-    }
+  editItem(item: FoodItem) {
+    this.newFoodItem = { ...item };
+    this.isEditing = true;
+    this.editingId = item.id!;
+    this.selectedFile = null;
+    this.isAdding.set(true);
+  }
 
-    clearFilters() {
-        this.startDate.set('');
-        this.endDate.set('');
-        this.fetchInvoices();
-    }
-
-
-    setTab(tab: string) {
-        this.activeTab.set(tab);
-        if (tab === 'billing') {
-            this.fetchInvoices();
+  deleteFoodItem(id: number) {
+    if (confirm('Are you sure you want to remove this food item?')) {
+      this.foodItemService.delete(id, this.userId()).subscribe({
+        next: () => {
+          this.toastService.show('Food item removed', 'success');
+          this.fetchCatalog();
+        },
+        error: (err) => {
+          this.toastService.show(err.error?.message || 'Failed to remove food item. It may be linked to an invoice.', 'error');
         }
+      });
     }
+  }
 
-    updateConfig() {
-        this.toastService.show('Billing configuration updated for user', 'success');
-    }
+  resetForm() {
+    this.newFoodItem = { name: '', price: 0, description: '', currency: 'INR', imageUrl: '' };
+    this.isEditing = false;
+    this.isAdding.set(false);
+    this.editingId = null;
+    this.selectedFile = null;
+  }
 
-    printInvoice(invoice: Invoice) {
-        window.print();
-    }
-
-    addFoodItem() {
-        if (!this.newFoodItem.name || this.newFoodItem.price < 0) {
-            this.toastService.show('Please provide valid name and valuation', 'warning');
-            return;
-        }
-
-        // Auto-assign currency if missing
-        this.newFoodItem.currency = this.newFoodItem.currency || 'INR';
-
-        const handleImageUpload = (id: number) => {
-            if (this.selectedFile) {
-                this.foodItemService.uploadImage(id, this.selectedFile, this.userId()).subscribe({
-                    next: () => {
-                        this.toastService.show('Image uploaded successfully', 'success');
-                        this.resetForm();
-                        this.fetchCatalog();
-                    },
-                    error: () => {
-                        this.toastService.show('Image upload failed', 'error');
-                        this.resetForm();
-                        this.fetchCatalog();
-                    }
-                });
-            } else {
-                this.resetForm();
-                this.fetchCatalog();
-            }
-        };
-
-        if (this.isEditing && this.editingId) {
-            this.foodItemService.update(this.editingId, this.newFoodItem, this.userId()).subscribe({
-                next: () => {
-                    this.toastService.show('Food item updated successfully', 'success');
-                    handleImageUpload(this.editingId!);
-                    this.isAdding.set(false);
-                }
-            });
-        } else {
-            this.foodItemService.create(this.newFoodItem, this.userId()).subscribe({
-                next: (createdItem) => {
-                    this.toastService.show('New food item added to user catalog', 'success');
-                    if (createdItem.id) {
-                        handleImageUpload(createdItem.id);
-                        this.isAdding.set(false);
-                    } else {
-                        this.resetForm();
-                        this.fetchCatalog();
-                        this.isAdding.set(false);
-                    }
-                }
-            });
-        }
-    }
-
-    editItem(item: FoodItem) {
-        this.newFoodItem = { ...item };
-        this.isEditing = true;
-        this.editingId = item.id!;
-        this.selectedFile = null;
-        this.isAdding.set(true);
-    }
-
-    deleteFoodItem(id: number) {
-        if (confirm('Are you sure you want to remove this food item?')) {
-            this.foodItemService.delete(id, this.userId()).subscribe({
-                next: () => {
-                    this.toastService.show('Food item removed', 'success');
-                    this.fetchCatalog();
-                },
-                error: (err) => {
-                    this.toastService.show(err.error?.message || 'Failed to remove food item. It may be linked to an invoice.', 'error');
-                }
-            });
-        }
-    }
-
-    resetForm() {
-        this.newFoodItem = { name: '', price: 0, description: '', currency: 'INR', imageUrl: '' };
-        this.isEditing = false;
-        this.isAdding.set(false);
-        this.editingId = null;
-        this.selectedFile = null;
-    }
-
-    getImageUrl(url: string | undefined): string {
-        if (!url) return '';
-        if (url.startsWith('http')) return url;
-        return `http://localhost:8084${url}`;
-    }
+  getImageUrl(url: string | undefined): string {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `http://localhost:8084${url}`;
+  }
 }
