@@ -5,6 +5,8 @@ import { StorageService } from '../../services/storage.service';
 import { UserService } from '../../services/user.service';
 import { ToastService } from '../../services/toast.service';
 
+import { environment } from '../../../environments/environment';
+
 @Component({
     selector: 'app-profile',
     standalone: true,
@@ -19,7 +21,7 @@ export class ProfileComponent implements OnInit {
     };
     selectedImageFile?: File;
     selectedImagePreview?: string;
-    BASE_IMAGE_URL = 'http://localhost:8084';
+    BASE_IMAGE_URL = environment.apiUrl;
 
     constructor(
         private storageService: StorageService,

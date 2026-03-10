@@ -22,7 +22,7 @@ export class ErrorInterceptor implements HttpInterceptor {
                 }
 
                 // You could use a snackbar or toast service here
-                window.alert(errorMessage);
+                console.error(errorMessage);
                 return throwError(() => error);
             })
         );

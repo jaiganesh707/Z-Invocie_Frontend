@@ -1,14 +1,17 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FoodItemService } from '../../services/food-item.service';
 import { InvoiceService } from '../../services/invoice.service';
 import { UserService } from '../../services/user.service';
+import { ToastService } from '../../services/toast.service';
 import { FoodItem } from '../../models/food-item.model';
 import { CreateInvoiceDto } from '../../models/invoice.model';
 
-import { ToastService } from '../../services/toast.service';
+import { interval, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 @Component({
     selector: 'app-user-billing',
@@ -17,7 +20,7 @@ import { ToastService } from '../../services/toast.service';
     templateUrl: './user-billing.component.html',
     styleUrls: ['./user-billing.component.css']
 })
-export class UserBillingComponent implements OnInit {
+export class UserBillingComponent implements OnInit, OnDestroy {
     userId!: number;
     foodItems: FoodItem[] = [];
     selectedItems: { foodItem: FoodItem, quantity: number }[] = [];
@@ -27,6 +30,7 @@ export class UserBillingComponent implements OnInit {
     user: any = null;
     isLoading = false;
     searchQuery: string = '';
+    private destroy$ = new Subject<void>();
 
     constructor(
         private route: ActivatedRoute,
@@ -39,12 +43,12 @@ export class UserBillingComponent implements OnInit {
     ) { }
 
     ngOnInit(): void {
-        this.route.paramMap.subscribe(params => {
+        this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
             const idParam = params.get('userId');
             this.userId = Number(idParam);
 
             if (idParam && !isNaN(this.userId)) {
-                this.reset(); // Reset state for the new user
+                this.reset();
                 this.fetchFoodItems();
                 this.fetchUserData();
             } else {
@@ -52,10 +56,24 @@ export class UserBillingComponent implements OnInit {
                 this.router.navigate(['/super-admin']);
             }
         });
+
+        // Polling every 30 seconds for catalog updates
+        interval(30000)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe(() => {
+                if (!this.isGenerated) {
+                    this.fetchFoodItems(false);
+                }
+            });
     }
 
-    fetchFoodItems(): void {
-        this.isLoading = true;
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
+    fetchFoodItems(showLoading = true): void {
+        if (showLoading) this.isLoading = true;
         this.foodItemService.getAll(this.userId).subscribe({
             next: data => {
                 this.foodItems = data || [];
@@ -159,7 +177,7 @@ export class UserBillingComponent implements OnInit {
     getImageUrl(url: string | undefined): string {
         if (!url) return '';
         if (url.startsWith('http')) return url;
-        return `http://localhost:8084${url}`;
+        return `${environment.apiUrl}${url}`;
     }
 
     reset(): void {

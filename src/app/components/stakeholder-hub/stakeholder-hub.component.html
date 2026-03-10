@@ -142,7 +142,8 @@
                                         <img [src]="newFoodItem.imageUrl" *ngIf="newFoodItem.imageUrl.length > 10"
                                             class="rounded-3 shadow-lg"
                                             style="max-height: 100px; max-width: 100%; object-fit: contain;">
-                                        <p class="text-emerald small mt-2" *ngIf="newFoodItem.imageUrl.length <= 10">Live
+                                        <p class="text-emerald small mt-2" *ngIf="newFoodItem.imageUrl.length <= 10">
+                                            Live
                                             Preview Terminal</p>
                                     </div>
                                 </div>
@@ -209,13 +210,17 @@
                             </div>
 
                             <div class="mt-auto value-footer d-flex justify-content-between align-items-center">
-                                <div class="text-start">
-                                    <small class="text-muted text-emerald ls-wide d-block mb-1"
+                                <div class="text-start flex-grow-1 overflow-hidden me-2">
+                                    <small class="text-muted text-emerald ls-wide d-block mb-1 text-truncate"
                                         style="font-size: 0.65rem; font-weight: 700;">VALUATION</small>
-                                    <span class="text-emerald fw-bold fs-5">₹{{ item.price | number:'1.2-2' }}</span>
+                                    <div class="text-emerald fw-bold text-truncate"
+                                        style="font-size: clamp(1rem, 1.25vw, 1.25rem);"
+                                        [title]="'₹' + (item.price | number:'1.2-2')">
+                                        ₹{{ item.price | number:'1.2-2' }}
+                                    </div>
                                 </div>
                                 <button
-                                    class="btn btn-sm glass border-emerald text-emerald rounded-circle p-2 hover-lift"
+                                    class="btn btn-sm glass border-emerald text-emerald rounded-circle p-2 hover-lift flex-shrink-0"
                                     (click)="editItem(item)" title="Edit Asset">
                                     <i class="bi bi-pencil-square"></i>
                                 </button>
@@ -271,22 +276,29 @@
 
                         <!-- Date Filter Forge -->
                         <div
-                            class="d-flex align-items-center gap-2 bg-glass border-glass p-2 rounded-pill shadow-inner">
-                            <div class="d-flex align-items-center px-3 border-end border-glass">
+                            class="d-flex flex-column flex-md-row align-items-stretch align-items-md-center gap-2 bg-glass border-glass p-2 p-md-1 rounded-3 shadow-inner">
+                            <div
+                                class="d-flex align-items-center px-3 py-2 py-md-1 border-bottom border-md-bottom-0 border-md-end border-glass flex-grow-1">
                                 <i class="bi bi-calendar-event text-emerald me-3 opacity-50"></i>
                                 <input type="date" [ngModel]="startDate()"
                                     (ngModelChange)="startDate.set($event); applyFilters()"
-                                    class="bg-transparent border-0 text-white small focus-none" style="width: 120px;">
+                                    class="bg-transparent border-0 text-white small focus-none w-100"
+                                    style="outline: none; min-width: 130px;">
                             </div>
-                            <div class="d-flex align-items-center px-3">
+                            <div class="d-flex align-items-center px-3 py-2 py-md-1 flex-grow-1">
+                                <i class="bi bi-calendar-check text-emerald me-3 opacity-50 d-md-none"></i>
                                 <input type="date" [ngModel]="endDate()"
                                     (ngModelChange)="endDate.set($event); applyFilters()"
-                                    class="bg-transparent border-0 text-white small focus-none" style="width: 120px;">
+                                    class="bg-transparent border-0 text-white small focus-none w-100"
+                                    style="outline: none; min-width: 130px;">
                             </div>
-                            <button class="btn btn-sm glass rounded-circle p-2 text-rose hover-lift"
-                                title="Reset Filters" (click)="clearFilters()">
-                                <i class="bi bi-x-circle"></i>
-                            </button>
+                            <div
+                                class="d-flex align-items-center justify-content-end justify-content-md-center px-3 px-md-2 py-2 py-md-1 border-top border-md-top-0 border-glass">
+                                <button class="btn btn-sm glass rounded-circle p-2 text-rose hover-lift"
+                                    title="Reset Filters" (click)="clearFilters()">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
 

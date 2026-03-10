@@ -11,6 +11,7 @@ import { FoodItem } from '../../models/food-item.model';
 import { Invoice } from '../../models/invoice.model';
 import { interval, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 @Component({
   // ... (omitted selector and templates for brevity as they are unchanged)
@@ -233,11 +234,14 @@ export class StakeholderHubComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Polling every 30 seconds for catalog and activity
+    // Polling every 30 seconds for catalog and billing activity
     interval(30000)
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
         this.fetchCatalog();
+        if (this.activeTab() === 'billing') {
+          this.fetchInvoices();
+        }
       });
   }
 
@@ -396,6 +400,6 @@ export class StakeholderHubComponent implements OnInit, OnDestroy {
   getImageUrl(url: string | undefined): string {
     if (!url) return '';
     if (url.startsWith('http')) return url;
-    return `http://localhost:8084${url}`;
+    return url.startsWith('/') ? `${environment.apiUrl}${url}` : `${environment.apiUrl}/${url}`;
   }
 }

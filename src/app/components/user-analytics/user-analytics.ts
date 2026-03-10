@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { AnalyticsService } from '../../services/analytics.service';
 import { DataCacheService } from '../../services/data-cache.service';
+import { ToastService } from '../../services/toast.service';
 import { interval, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Chart, registerables } from 'chart.js';
@@ -37,6 +38,7 @@ export class UserAnalyticsComponent implements OnInit, OnDestroy, OnChanges {
     private route: ActivatedRoute,
     private analyticsService: AnalyticsService,
     private cacheService: DataCacheService,
+    private toastService: ToastService,
     private cdr: ChangeDetectorRef
   ) { }
 
@@ -73,15 +75,21 @@ export class UserAnalyticsComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   fetchAnalytics(showLoading = true): void {
-    if (showLoading) this.isLoading = true;
+    if (showLoading && !this.analyticsData) this.isLoading = true;
+
     this.analyticsService.getBillingAnalytics(this.userId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
+          const isBackgroundUpdate = !this.isLoading && this.analyticsData;
           this.analyticsData = data;
           this.isLoading = false;
           this.cdr.detectChanges();
           setTimeout(() => this.initCharts(), 0);
+
+          if (isBackgroundUpdate) {
+            this.toastService.show('Portfolio metrics synchronized.', 'success');
+          }
         },
         error: (err) => {
           console.error('Error fetching analytics:', err);
@@ -138,7 +146,7 @@ export class UserAnalyticsComponent implements OnInit, OnDestroy, OnChanges {
           }
         },
         animation: {
-          duration: 2000,
+          duration: 500, // Reduced from 2000 for "Automatic" feel
           easing: 'easeOutQuart'
         }
       }
@@ -179,7 +187,7 @@ export class UserAnalyticsComponent implements OnInit, OnDestroy, OnChanges {
         animation: {
           animateRotate: true,
           animateScale: true,
-          duration: 2000
+          duration: 500
         }
       }
     });
@@ -221,7 +229,7 @@ export class UserAnalyticsComponent implements OnInit, OnDestroy, OnChanges {
         animation: {
           animateRotate: true,
           animateScale: true,
-          duration: 2000
+          duration: 500
         }
       }
     });

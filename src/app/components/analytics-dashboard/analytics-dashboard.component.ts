@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -22,7 +22,7 @@ Chart.register(...registerables);
       backdrop-filter: var(--glass-blur);
       border: 1px solid var(--glass-border);
       border-radius: 28px;
-      padding: 2.5rem;
+      padding: 1.5rem;
       height: 100%;
       box-shadow: var(--glass-inner-glow), var(--shadow-premium);
     }
@@ -111,7 +111,7 @@ export class AnalyticsDashboardComponent implements OnInit {
             }
         },
         animation: {
-            duration: 2500,
+            duration: 500, // Reduced from 2500 for "Automatic/Instant" feel
             easing: 'easeOutQuart'
         }
     };
@@ -121,7 +121,8 @@ export class AnalyticsDashboardComponent implements OnInit {
     constructor(
         private route: ActivatedRoute,
         private analyticsService: AnalyticsService,
-        private toastService: ToastService
+        private toastService: ToastService,
+        private cdr: ChangeDetectorRef
     ) { }
 
     ngOnInit(): void {
@@ -139,24 +140,45 @@ export class AnalyticsDashboardComponent implements OnInit {
     }
 
     fetchPerformance(showLoading = true) {
-        if (showLoading) this.isLoading = true;
+        // Only show full loading if we don't have existing data in the component
+        if (showLoading && this.performanceData.length === 0) {
+            this.isLoading = true;
+        }
+
         this.analyticsService.getStakeholderPerformance()
             .pipe(takeUntil(this.destroy$))
             .subscribe({
                 next: (data) => {
+                    const isNewData = JSON.stringify(this.performanceData) !== JSON.stringify(data);
                     this.performanceData = data;
                     this.isLoading = false;
                     this.updateChart();
+                    this.cdr.detectChanges();
+
+                    if (isNewData && !showLoading) {
+                        this.toastService.show('Performance data synchronized automatically', 'success');
+                    }
                 },
                 error: (err) => {
-                    this.toastService.show('Failed to fetch performance analytics', 'error');
+                    console.error('Analytics Fetch Error:', err);
                     this.isLoading = false;
                 }
             });
     }
 
     updateChart() {
-        this.barChartData.labels = this.performanceData.map(d => d.username);
-        this.barChartData.datasets[0].data = this.performanceData.map(d => d.profit);
+        const labels = this.performanceData.map(d => d.username);
+        const data = this.performanceData.map(d => d.profit);
+
+        this.barChartData = {
+            ...this.barChartData,
+            labels: labels,
+            datasets: [
+                {
+                    ...this.barChartData.datasets[0],
+                    data: data
+                }
+            ]
+        };
     }
 }

@@ -17,27 +17,29 @@
         </div>
 
         <nav class="flex-grow-1">
-            <a class="nav-sidebar-link" routerLink="/home" routerLinkActive="active">
+            <a class="nav-sidebar-link" routerLink="/home" routerLinkActive="active" (click)="isSidebarActive = false">
                 <i class="bi bi-speedometer2"></i> Global Market
             </a>
 
 
 
-            <a class="nav-sidebar-link" *ngIf="showSuperAdminBoard" routerLink="/analytics" routerLinkActive="active">
+            <a class="nav-sidebar-link" *ngIf="showSuperAdminBoard" routerLink="/analytics" routerLinkActive="active"
+                (click)="isSidebarActive = false">
                 <i class="bi bi-graph-up-arrow"></i> Analytics
             </a>
 
             <a class="nav-sidebar-link" *ngIf="isLoggedIn && !showSuperAdminBoard"
-                [routerLink]="['/user-billing', userId]" routerLinkActive="active">
+                [routerLink]="['/user-billing', userId]" routerLinkActive="active" (click)="isSidebarActive = false">
                 <i class="bi bi-receipt"></i> Billing
             </a>
 
             <a class="nav-sidebar-link" *ngIf="showSuperAdminBoard" routerLink="/super-admin" routerLinkActive="active"
-                (click)="refreshAuthority()">
+                (click)="refreshAuthority(); isSidebarActive = false">
                 <i class="bi bi-shield-lock"></i> Authority
             </a>
 
-            <a class="nav-sidebar-link" *ngIf="isLoggedIn" routerLink="/profile" routerLinkActive="active">
+            <a class="nav-sidebar-link" *ngIf="isLoggedIn" routerLink="/profile" routerLinkActive="active"
+                (click)="isSidebarActive = false">
                 <i class="bi bi-person-circle"></i> Identity
             </a>
 

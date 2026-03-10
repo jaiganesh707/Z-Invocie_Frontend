@@ -52,11 +52,8 @@ export class LoginComponent implements OnInit {
                 this.authService.setCurrentUser(data);
                 this.toastService.success('Login successful! Welcome back.');
 
-                if (data.role === 'ROLE_SUPER_ADMIN') {
-                    this.router.navigate(['/super-admin']);
-                } else {
-                    this.router.navigate(['/home']);
-                }
+                // User requested to always land on Global Market first
+                this.router.navigate(['/home']);
             },
             error: err => {
                 this.isLoginFailed = true;

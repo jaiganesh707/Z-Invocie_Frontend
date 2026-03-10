@@ -171,15 +171,23 @@
 .prediction-item {
     background: rgba(255, 255, 255, 0.02);
     border-radius: 16px;
-    padding: 1.25rem;
+    padding: 1rem;
     border-left: 4px solid var(--primary);
     margin-bottom: 1rem;
     transition: all 0.3s ease;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .prediction-item:hover {
     background: rgba(255, 255, 255, 0.05);
     border-left-width: 8px;
+}
+
+@media (max-width: 768px) {
+    .prediction-item {
+        padding: 0.85rem;
+    }
 }
 
 .intelligence-header {
