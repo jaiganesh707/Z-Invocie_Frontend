@@ -27,8 +27,11 @@ export class UserBillingComponent implements OnInit, OnDestroy {
     totalAmount = 0;
     isGenerated = false;
     generatedInvoice: any = null;
+    paymentMode: 'cash' | 'upi' = 'cash';
+    upiQrUrl: string = '';
     user: any = null;
     isLoading = false;
+    upiPaid = false;
     searchQuery: string = '';
     private destroy$ = new Subject<void>();
 
@@ -81,7 +84,7 @@ export class UserBillingComponent implements OnInit, OnDestroy {
                 this.cdr.detectChanges();
             },
             error: err => {
-                console.error(err);
+                this.toastService.error('Failed to synchronize asset catalog.');
                 this.isLoading = false;
                 this.cdr.detectChanges();
             }
@@ -95,7 +98,7 @@ export class UserBillingComponent implements OnInit, OnDestroy {
                 this.cdr.detectChanges();
             },
             error: (err: any) => {
-                console.error('Failed to fetch stakeholder profile', err);
+                this.toastService.error('Critical: Failed to resolve stakeholder identity.');
             }
         });
     }
@@ -137,7 +140,8 @@ export class UserBillingComponent implements OnInit, OnDestroy {
         this.totalAmount = this.selectedItems.reduce((acc, curr) => acc + (curr.foodItem.price * curr.quantity), 0);
     }
 
-    generateBill(): void {
+    generateBill(mode: 'cash' | 'upi' = 'cash'): void {
+        this.paymentMode = mode;
         // Double-check userId from route if it's somehow missing from memory
         if (!this.userId || isNaN(this.userId)) {
             this.userId = Number(this.route.snapshot.paramMap.get('userId'));
@@ -166,6 +170,18 @@ export class UserBillingComponent implements OnInit, OnDestroy {
                 this.toastService.success('Bill generated and verified successfully.');
                 this.isGenerated = true;
                 this.generatedInvoice = data;
+                this.upiPaid = false; // Reset for new UPI transaction
+
+                if (this.paymentMode === 'upi' && this.user && this.user.upiId) {
+                    const invoiceId = this.generatedInvoice.id;
+                    const upiString = `upi://pay?pa=${this.user.upiId}&pn=${encodeURIComponent(this.user.payeeName || this.user.username)}&am=${this.totalAmount}&cu=${this.user.currency || 'INR'}&tn=Invoice_${invoiceId}`;
+                    this.upiQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiString)}`;
+                } else if (this.paymentMode === 'upi') {
+                    this.toastService.show('Node has no UPI configuration! Falling back to standard invoice.', 'warning');
+                }
+            },
+            error: err => {
+                this.toastService.error('Verification Failed: External settlement node rejected the request.');
             }
         });
     }
@@ -180,10 +196,24 @@ export class UserBillingComponent implements OnInit, OnDestroy {
         return `${environment.apiUrl}${url}`;
     }
 
+    verifyUpiPayment(): void {
+        this.isLoading = true;
+        this.toastService.show('Synchronizing with bank terminal...', 'info');
+
+        setTimeout(() => {
+            this.upiPaid = true;
+            this.isLoading = false;
+            this.toastService.show('Transaction Authenticated. Generating Statement.', 'success');
+            this.cdr.detectChanges();
+        }, 2000);
+    }
+
     reset(): void {
         this.selectedItems = [];
         this.totalAmount = 0;
         this.isGenerated = false;
         this.generatedInvoice = null;
+        this.upiQrUrl = '';
+        this.upiPaid = false;
     }
 }

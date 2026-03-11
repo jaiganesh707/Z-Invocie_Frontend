@@ -15,6 +15,10 @@
                     <div class="badge glass border-emerald text-emerald p-2 px-3 mt-2">
                         <i class="bi bi-person-circle me-2"></i> Client Signature: {{ userId }}
                     </div>
+                    <div *ngIf="user?.upiId"
+                        class="badge bg-emerald bg-opacity-10 text-white p-2 px-3 mt-2 ms-2 border border-emerald border-opacity-25 animate-fade">
+                        <i class="bi bi-patch-check-fill me-1"></i> UPI TERMINAL ACTIVE
+                    </div>
                 </div>
             </div>
             <a [routerLink]="['/user-analytics', userId]" class="btn btn-premium-outline px-4">
@@ -32,7 +36,7 @@
                     <div class="p-2 bg-emerald bg-opacity-10 rounded-3 me-3">
                         <i class="bi bi-grid-fill text-emerald"></i>
                     </div>
-                    <h5 class="mb-0 text-emerald">Asset Selection</h5>
+                    <h5 class="mb-0 text-gradient ls-tight fw-bold">Strategic Asset Selection</h5>
                     <div class="spinner-border spinner-border-sm text-emerald ms-3" role="status" *ngIf="isLoading">
                         <span class="visually-hidden">Loading...</span>
                     </div>
@@ -101,7 +105,7 @@
                 <div class="p-2 bg-emerald bg-opacity-10 rounded-3 me-3">
                     <i class="bi bi-cart-check-fill text-emerald"></i>
                 </div>
-                <h5 class="mb-0 text-emerald">Ledger Composition</h5>
+                <h5 class="mb-0 text-gradient ls-tight fw-bold">Ledger Composition</h5>
             </div>
             <div class="selected-items-list mb-4 overflow-auto pe-2" style="max-height: 400px;">
                 <div class="bg-glass border border-glass p-3 mb-3 d-flex align-items-center rounded-4 animate-fade shadow-sm hover-lift"
@@ -134,10 +138,16 @@
                     <i class="bi bi-tag-fill me-2"></i> APPLY PROMO CODE
                 </button>
                 <button
-                    class="btn-premium w-100 py-3 fs-5 shadow-lg rounded-pill d-flex justify-content-between align-items-center px-4"
-                    (click)="generateBill()" [disabled]="selectedItems.length === 0">
-                    <span>SETTLE LEDGER (₹{{ totalAmount | number:'1.2-2' }})</span>
-                    <i class="bi bi-arrow-right-circle-fill"></i>
+                    class="btn-premium btn-premium-cash w-100 py-3 fs-5 shadow-lg rounded-pill d-flex justify-content-between align-items-center px-4 mb-3"
+                    (click)="generateBill('cash')" [disabled]="selectedItems.length === 0">
+                    <span>SETTLE CASH (₹{{ totalAmount | number:'1.2-2' }})</span>
+                    <i class="bi bi-cash-stack"></i>
+                </button>
+                <button
+                    class="btn btn-premium-gold w-100 py-3 fs-5 shadow-lg rounded-pill d-flex justify-content-between align-items-center px-4"
+                    (click)="generateBill('upi')" [disabled]="selectedItems.length === 0">
+                    <span class="fw-bold">SETTLE DIGITAL UPI (₹{{ totalAmount | number:'1.2-2' }})</span>
+                    <i class="bi bi-qr-code-scan"></i>
                 </button>
             </div>
         </div>
@@ -149,13 +159,24 @@
     <div class="col-md-10">
         <div class="glass-card shadow-2xl p-0 overflow-hidden" id="printableBill">
             <!-- Glass Header for UI, Simple for Print -->
-            <div
-                class="p-4 p-md-5 d-flex flex-column flex-md-row justify-content-between align-items-md-center border-bottom border-glass bg-glass no-print gap-3">
-                <h2 class="mb-0 text-gradient ls-tight"><i class="bi bi-bank2 text-emerald me-3"></i>Z-FINANCE</h2>
-                <div class="text-end">
-                    <span
-                        class="badge glass border-emerald text-emerald p-3 px-4 shadow-lg rounded-pill ls-wide">AUTHENTICATED
-                        FINANCIAL STATEMENT</span>
+            <!-- Premium Statement Header -->
+            <div class="invoice-premium-header no-print">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-4">
+                    <div class="brand-group d-flex align-items-center">
+                        <div class="logo-orb me-3">
+                            <i class="bi bi-bank2"></i>
+                        </div>
+                        <div class="brand-text-block">
+                            <h2 class="mb-0 text-white fw-bold ls-tight" style="line-height: 1;">Z-FINANCE</h2>
+                            <p class="text-emerald small mb-0 fw-bold ls-wide mt-1"
+                                style="font-size: 0.65rem; opacity: 0.8;">SECURE SETTLEMENT</p>
+                        </div>
+                    </div>
+                    <div class="header-actions">
+                        <span class="badge-premium">
+                            <i class="bi bi-shield-check me-2"></i> AUTHENTICATED STATEMENT
+                        </span>
+                    </div>
                 </div>
             </div>
 
@@ -165,94 +186,179 @@
                     <p class="text-muted fs-5">Certified Wealth Management Statement</p>
                 </div>
 
-                <div class="row mb-5 gy-4">
-                    <div class="col-sm-6">
-                        <h6 class="text-uppercase text-muted fw-bold mb-3 ls-wide">Recipient Details</h6>
-                        <div class="fs-5 text-dark fw-semibold">{{ generatedInvoice.user.username }}</div>
-                        <div class="text-muted">{{ generatedInvoice.user.email }}</div>
-                        <div class="text-muted mt-2">Client ID: #{{ userId }}</div>
-                    </div>
-                    <div class="col-sm-6 text-sm-end">
-                        <h6 class="text-uppercase text-muted fw-bold mb-3 ls-wide">Invoice Info</h6>
-                        <div class="fs-5 text-dark fw-semibold">Statement #{{ generatedInvoice.id }}</div>
-                        <div class="text-muted">{{ generatedInvoice.createdAt | date:'MMMM d, yyyy' }}</div>
-                        <div class="text-muted">{{ generatedInvoice.createdAt | date:'h:mm a' }}</div>
-                    </div>
-                </div>
+                <!-- Enhanced UPI Terminal (Verification Phase) -->
+                <div *ngIf="paymentMode === 'upi' && upiQrUrl && !upiPaid"
+                    class="upi-settlement-terminal no-print animate-slide">
+                    <div class="terminal-inner">
+                        <div class="terminal-header mb-5">
+                            <div class="merchant-badge mb-3">
+                                <i class="bi bi-shield-lock-fill me-2 text-emerald"></i>
+                                <span>SECURE MERCHANT TERMINAL</span>
+                            </div>
+                            <h2 class="merchant-name display-6 fw-bold mb-1">{{ user?.payeeName || user?.username }}
+                            </h2>
+                            <div class="merchant-subtitle text-muted fw-bold ls-wide small">TRANSACTION PENDING
+                                VERIFICATION</div>
+                        </div>
 
-                <div class="table-responsive-sm">
-                    <table class="table table-borderless fs-5">
-                        <thead class="border-bottom-2 border-dark">
-                            <tr class="text-muted">
-                                <th class="py-3">Line Item</th>
-                                <th class="py-3 text-center">Unit Price</th>
-                                <th class="py-3 text-center">Qty</th>
-                                <th class="py-3 text-end">Extended Price</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let item of generatedInvoice.items; let i = index"
-                                class="border-bottom border-light">
-                                <td class="py-4">
-                                    <div class="fw-bold fs-5">{{ item.foodItem.name }}</div>
-                                    <div class="text-muted small">ID: {{ item.foodItem.id }}</div>
-                                </td>
-                                <td class="py-4 text-center">
-                                    {{ item.foodItem.currency === 'USD' ? '$' : '₹' }}{{ item.price }}
-                                </td>
-                                <td class="py-4 text-center">{{ item.quantity }}</td>
-                                <td class="py-4 text-end fw-bold">
-                                    {{ item.foodItem.currency === 'USD' ? '$' : '₹' }}{{ (item.price * item.quantity) }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                        <div class="qr-vault-section mb-5">
+                            <div class="qr-orb shadow-premium">
+                                <img [src]="upiQrUrl" alt="Pay QR" class="qr-image">
+                                <div class="qr-scanner-line"></div>
+                            </div>
+                            <div class="amount-display mt-4">
+                                <div class="text-muted small fw-bold ls-wide mb-1">TOTAL PAYABLE</div>
+                                <div class="display-4 fw-bold text-dark ls-tight">₹{{ totalAmount | number:'1.2-2' }}
+                                </div>
+                            </div>
+                        </div>
 
-                <div class="row pt-5">
-                    <div class="col-lg-5 col-sm-12 ms-auto">
-                        <div class="p-4 bg-light rounded-4">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="text-muted">Total Gross Assets</span>
-                                <span>
-                                    {{ generatedInvoice.items[0]?.foodItem?.currency === 'USD' ? '$' : '₹' }}{{
-                                    generatedInvoice.totalAmount }}
+                        <!-- Verification Action -->
+                        <div class="mb-5">
+                            <button class="btn-premium px-5 py-3 rounded-pill fw-bold shadow-emerald w-100"
+                                [disabled]="isLoading" (click)="verifyUpiPayment()" style="max-width: 320px;">
+                                <span *ngIf="!isLoading">
+                                    <i class="bi bi-shield-check me-2"></i> VERIFY & GENERATE BILL
                                 </span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="text-muted">Surcharge (WAIVED)</span>
-                                <span>$0.00 / ₹0.00</span>
-                            </div>
-                            <hr class="my-3">
-                            <div class="d-flex justify-content-between align-items-center h3 mb-0">
-                                <span class="fw-bold">Net Asset Value (NAV)</span>
-                                <span class="fw-bold text-emerald">
-                                    {{ generatedInvoice.items[0]?.foodItem?.currency === 'USD' ? '$' : '₹' }}{{
-                                    generatedInvoice.totalAmount }}
+                                <span *ngIf="isLoading">
+                                    <span class="spinner-border spinner-border-sm me-2"></span> TERMINAL SYNC...
                                 </span>
+                            </button>
+                        </div>
+
+                        <div class="payment-node-card p-4 rounded-4 bg-light border border-light d-inline-block text-start"
+                            style="min-width: 320px;">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="icon-orb-sm bg-emerald-soft text-emerald me-3">
+                                    <i class="bi bi-wallet2"></i>
+                                </div>
+                                <div>
+                                    <div class="text-muted small fw-bold">VPA IDENTIFIER</div>
+                                    <div class="text-dark fw-bold">{{ user?.upiId || 'NOTVPA@UPI' }}</div>
+                                </div>
                             </div>
+                            <div class="d-flex align-items-center">
+                                <div class="icon-orb-sm bg-emerald-soft text-emerald me-3">
+                                    <i class="bi bi-lightning-charge"></i>
+                                </div>
+                                <div>
+                                    <div class="text-muted small fw-bold">SETTLEMENT TOKEN</div>
+                                    <div class="text-dark fw-bold">INV-{{ generatedInvoice?.id }} (RECO)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="terminal-footer mt-5 pt-4">
+                            <div
+                                class="d-flex justify-content-center align-items-center gap-4 mb-4 opacity-75 grayscale-hover payment-partners">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo-vector.svg"
+                                    height="22" alt="UPI" class="partner-logo">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Google_Pay_Logo.svg/3840px-Google_Pay_Logo.svg.png"
+                                    height="22" alt="GPay" class="partner-logo">
+                                <img src="https://cdn.blume.vc/blume/imager/images/startups/ippopay/logo/22188/IppoPay_LOGO-blue-1.f1683882366_5dbced9873927dbc00aa1bed763f6f2b.png"
+                                    height="22" alt="ippopay" class="partner-logo filter-indigo">
+                            </div>
+                            <button
+                                class="btn btn-link text-rose text-decoration-none fw-bold small opacity-75 hover-opacity-100"
+                                (click)="reset()">
+                                <i class="bi bi-x-circle me-1"></i> DISCONTINUE PAYMENT
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-5 text-center text-muted fw-light">
-                    <p>Verified by Z-FINANCE SECURED. This is a legally valid digital document.</p>
-                </div>
+                <!-- Verified Bill Content -->
+                <div *ngIf="paymentMode === 'cash' || upiPaid" class="animate-fade">
+
+
+                    <div class="row mb-5 gy-4">
+                        <div class="col-sm-6">
+                            <h6 class="text-uppercase text-muted fw-bold mb-3 ls-wide">Recipient Details</h6>
+                            <div class="fs-5 text-dark fw-semibold">{{ generatedInvoice.user.username }}</div>
+                            <div class="text-muted">{{ generatedInvoice.user.email }}</div>
+                            <div class="text-muted mt-2">Client ID: #{{ userId }}</div>
+                        </div>
+                        <div class="col-sm-6 text-sm-end">
+                            <h6 class="text-uppercase text-muted fw-bold mb-3 ls-wide">Invoice Info</h6>
+                            <div class="fs-5 text-dark fw-semibold">Statement #{{ generatedInvoice.id }}</div>
+                            <div class="text-muted">{{ generatedInvoice.createdAt | date:'MMMM d, yyyy' }}</div>
+                            <div class="text-muted">{{ generatedInvoice.createdAt | date:'h:mm a' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive-sm">
+                        <table class="table table-borderless fs-5">
+                            <thead class="border-bottom-2 border-dark">
+                                <tr class="text-muted">
+                                    <th class="py-3">Line Item</th>
+                                    <th class="py-3 text-center">Unit Price</th>
+                                    <th class="py-3 text-center">Qty</th>
+                                    <th class="py-3 text-end">Extended Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let item of generatedInvoice.items; let i = index"
+                                    class="border-bottom border-light">
+                                    <td class="py-4">
+                                        <div class="fw-bold fs-5">{{ item.foodItem.name }}</div>
+                                        <div class="text-muted small">ID: {{ item.foodItem.id }}</div>
+                                    </td>
+                                    <td class="py-4 text-center">
+                                        {{ item.foodItem.currency === 'USD' ? '$' : '₹' }}{{ item.price }}
+                                    </td>
+                                    <td class="py-4 text-center">{{ item.quantity }}</td>
+                                    <td class="py-4 text-end fw-bold">
+                                        {{ item.foodItem.currency === 'USD' ? '$' : '₹' }}{{ (item.price *
+                                        item.quantity) }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="row pt-5">
+                        <div class="col-lg-5 col-sm-12 ms-auto">
+                            <div class="p-4 bg-light rounded-4">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-muted">Total Gross Assets</span>
+                                    <span>
+                                        {{ generatedInvoice.items[0]?.foodItem?.currency === 'USD' ? '$' : '₹' }}{{
+                                        generatedInvoice.totalAmount }}
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-muted">Surcharge (WAIVED)</span>
+                                    <span>$0.00 / ₹0.00</span>
+                                </div>
+                                <hr class="my-3">
+                                <div class="d-flex justify-content-between align-items-center h3 mb-0">
+                                    <span class="fw-bold">Net Asset Value (NAV)</span>
+                                    <span class="fw-bold text-emerald">
+                                        {{ generatedInvoice.items[0]?.foodItem?.currency === 'USD' ? '$' : '₹' }}{{
+                                        generatedInvoice.totalAmount }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div> <!-- Close Verified Bill Content wrapper -->
             </div>
 
-            <div
-                class="card-footer bg-glass border-top border-glass p-4 no-print d-flex justify-content-center flex-wrap gap-3">
+            <!-- Card Footer -->
+            <div *ngIf="paymentMode === 'cash' || upiPaid"
+                class="card-footer bg-glass border-top border-glass p-4 no-print d-flex justify-content-center flex-wrap gap-4">
                 <button class="btn-premium px-5 py-3 rounded-pill fw-bold shadow-emerald hover-lift"
                     (click)="printBill()">
                     <i class="bi bi-printer-fill me-2"></i> AUTHORIZE PRINT
                 </button>
-                <button class="btn-premium-outline px-5 py-3 rounded-pill fw-bold hover-lift" (click)="reset()">
-                    <i class="bi bi-plus-circle me-2"></i> NEW RECONCILIATION
+                <button class="btn btn-premium-outline px-5 py-3 rounded-pill fw-bold hover-lift" (click)="reset()"
+                    style="border-color: var(--rose) !important; color: var(--rose) !important;">
+                    <i class="bi bi-x-circle me-2"></i> CLOSE & RETURN TO BILLING
                 </button>
-                <a class="btn btn-link text-emerald opacity-75 hover-opacity-100 text-decoration-none"
-                    routerLink="/super-admin">
-                    <i class="bi bi-arrow-left me-1"></i> Return to Terminal
-                </a>
+                <div class="w-100 mt-2 text-center text-muted small opacity-50">
+                    <i class="bi bi-info-circle me-1"></i> Authentication session persists within this terminal node.
+                </div>
             </div>
         </div>
     </div>

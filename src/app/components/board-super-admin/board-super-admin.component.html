@@ -14,23 +14,24 @@
         </div>
 
         <!-- Metric Hub -->
-        <div class="col-xl-6 col-md-6">
-            <div class="glass-card p-4 text-center hover-lift active-indicator-emerald">
-                <div class="icon-box bg-emerald mx-auto mb-3 shadow-emerald">
+        <div class="col-xl-6">
+            <div class="glass-card p-5 text-center hover-lift border-emerald-soft">
+                <div class="icon-orb bg-emerald mx-auto mb-4">
                     <i class="bi bi-people-fill"></i>
                 </div>
-                <h3 class="display-4 fw-bold mb-1 text-white">{{ users.length }}</h3>
-                <p class="text-muted text-emerald ls-wide small text-uppercase opacity-75">Authorized Stakeholders</p>
+                <h3 class="display-3 fw-bold mb-1 text-white tracking-tighter">{{ users.length }}</h3>
+                <p class="text-emerald ls-wide small fw-bold text-uppercase opacity-75">Active Stakeholders</p>
+                <div class="mt-3 pt-3 border-top border-glass opacity-50 small">AUTHORIZED NETWORK NODES</div>
             </div>
         </div>
-        <div class="col-xl-6 col-md-6">
-            <div class="glass-card p-4 text-center hover-lift active-indicator-blue">
-                <div class="icon-box bg-blue bg-opacity-10 mx-auto mb-3 shadow-blue border-blue-soft"
-                    style="border: 1px solid rgba(59, 130, 246, 0.3)">
+        <div class="col-xl-6">
+            <div class="glass-card p-5 text-center hover-lift border-blue-soft">
+                <div class="icon-orb bg-blue mx-auto mb-4">
                     <i class="bi bi-shield-lock-fill"></i>
                 </div>
-                <h3 class="display-4 fw-bold mb-1 text-white">{{ roles.length }}</h3>
-                <p class="text-blue ls-wide small text-uppercase opacity-75">Authorization Scopes</p>
+                <h3 class="display-3 fw-bold mb-1 text-white tracking-tighter">{{ roles.length }}</h3>
+                <p class="text-blue ls-wide small fw-bold text-uppercase opacity-75">Security Scopes</p>
+                <div class="mt-3 pt-3 border-top border-glass opacity-50 small">ACTIVE PRIVILEGE LAYERS</div>
             </div>
         </div>
     </div>
@@ -115,59 +116,64 @@
     </div>
 
     <!-- Stakeholder Registry -->
-    <div class="glass-card p-0 overflow-hidden mb-5 animate-slide" style="animation-delay: 0.4s">
-        <div class="p-5 d-flex align-items-center border-bottom border-glass bg-glass">
-            <div class="icon-box border-glass me-3">
-                <i class="bi bi-people-fill text-emerald"></i>
+    <div class="glass-card p-0 border-glass overflow-hidden mb-5 animate-slide" style="animation-delay: 0.4s">
+        <div class="p-5 d-flex align-items-center justify-content-between border-bottom border-glass bg-glass">
+            <div class="d-flex align-items-center">
+                <div class="icon-orb-sm bg-emerald-soft me-3">
+                    <i class="bi bi-people-fill text-emerald"></i>
+                </div>
+                <div>
+                    <h4 class=" mb-1 text-white fw-bold ls-tight">Stakeholder Registry</h4>
+                    <p class="text-emerald small mb-0 fw-bold opacity-50">AUTHORIZED NODES: {{ users.length }}</p>
+                </div>
             </div>
-            <div>
-                <h4 class=" mb-1 text-white ls-tight">Stakeholder Registry</h4>
-                <p class="text-emerald small mb-0 opacity-75">Active authorization tokens and profiles</p>
+            <div class="registry-actions">
+                <button class="btn btn-premium-outline rounded-pill px-4 btn-sm">
+                    <i class="bi bi-download me-2"></i> EXPORT LOGS
+                </button>
             </div>
         </div>
         <div class="table-responsive">
-            <table class="table table-dark table-hover mb-0">
+            <table class="table-premium table mb-0">
                 <thead>
-                    <tr class="text-muted bg-glass opacity-75">
-                        <th class="ps-5 py-4 ls-wide small">STAKEHOLDER IDENTITY</th>
-                        <th class="py-4 ls-wide small">AUTHORIZATION SCOPE</th>
-                        <th class="text-end pe-5 py-4 ls-wide small">COMMAND TERMINAL</th>
+                    <tr>
+                        <th class="ps-5">IDENTITY</th>
+                        <th>AUTHORIZATION</th>
+                        <th class="text-end pe-5">COMMANDS</th>
                     </tr>
                 </thead>
-                <tbody class="border-top-0">
-                    <tr *ngFor="let user of users" class="border-glass animate-fade">
-                        <td class="ps-5 py-4 align-middle">
+                <tbody>
+                    <tr *ngFor="let user of users" class="animate-fade">
+                        <td class="ps-5">
                             <div class="d-flex align-items-center">
-                                <div class="avatar-sm bg-emerald bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3 position-relative"
-                                    style="width: 56px; height: 56px;overflow: hidden;">
-                                    <span class="text-primary small fw-bold">{{
+                                <div class="avatar-hub me-3 shadow-emerald">
+                                    <img *ngIf="user.imageUrl" [src]="user.imageUrl"
+                                        class="w-100 h-100 object-fit-cover">
+                                    <span *ngIf="!user.imageUrl" class="text-emerald fw-bold">{{
                                         user.username.charAt(0).toUpperCase() }}</span>
                                 </div>
                                 <div>
-                                    <h6 class="mb-0 text-white fw-bold fs-5">{{ user.username }}</h6>
-                                    <small class="text-muted opacity-50 text-emerald">{{ user.email }}</small>
+                                    <h6 class="mb-0 text-white fw-bold">{{ user.username }}</h6>
+                                    <small class="text-muted small">{{ user.email }}</small>
                                 </div>
                             </div>
-
                         </td>
-                        <td class="py-4 align-middle">
-                            <span class="badge glass border-emerald text-emerald rounded-pill px-4 py-2 font-monospace">
+                        <td>
+                            <span class="badge-scope"
+                                [ngClass]="user.role === 'ROLE_SUPER_ADMIN' ? 'scope-admin' : 'scope-user'">
                                 {{ user.role?.replace('ROLE_', '') || 'USER' }}
                             </span>
                         </td>
-                        <td class="py-4 align-middle text-end pe-5">
-                            <div class="d-flex justify-content-end gap-2">
-                                <button (click)="editUser(user)"
-                                    class="btn glass border-blue text-blue rounded-pill px-3 py-2 hover-lift">
-                                    <i class="bi bi-pencil-fill"></i>
+                        <td class="text-end pe-5">
+                            <div class="d-flex justify-content-end gap-3">
+                                <button (click)="editUser(user)" class="btn-action-blue" title="Edit Profile">
+                                    <i class="bi bi-pencil-square"></i>
                                 </button>
-                                <button (click)="deleteUser(user.id)"
-                                    class="btn glass border-rose text-blue rounded-pill px-3 py-2 hover-lift">
+                                <button (click)="deleteUser(user.id)" class="btn-action-rose" title="Terminate Node">
                                     <i class="bi bi-trash3-fill"></i>
                                 </button>
-                                <a [routerLink]="['/stakeholder', user.id]"
-                                    class="btn-premium px-4 py-2 rounded-pill shadow-sm text-decoration-none d-inline-block">
-                                    <i class="bi bi-cpu me-2"></i> INSPECT HUB
+                                <a [routerLink]="['/stakeholder', user.id]" class="btn-inspect">
+                                    <i class="bi bi-cpu me-2"></i> INSPECT
                                 </a>
                             </div>
                         </td>

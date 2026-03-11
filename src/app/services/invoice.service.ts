@@ -28,4 +28,8 @@ export class InvoiceService {
         }
         return this.http.get<Invoice[]>(`${API_URL}/user/${userId}${params}`);
     }
+
+    delete(id: number): Observable<any> {
+        return this.http.delete(`${API_URL}/${id}`);
+    }
 }

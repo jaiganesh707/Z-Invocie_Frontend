@@ -8,9 +8,10 @@
 }
 
 .catalog-card {
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 24px;
-    border: 1px solid var(--glass-border);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+    backdrop-filter: blur(20px);
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     padding: 1.5rem;
     transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
@@ -24,8 +25,8 @@
 
 /* Commit to Ledger Button Refinement */
 .commit-to-ledger {
-    background: linear-gradient(135deg, #10b981, #059669);
-    border-radius: 50px !important;
+    background: linear-gradient(135deg, #10b981, #064e3b);
+    border-radius: 14px !important;
     border: none;
     color: white;
     font-weight: 700;
@@ -184,4 +185,177 @@
 .selected-items-list::-webkit-scrollbar-thumb {
     background: var(--border-glass);
     border-radius: 10px;
+}
+
+.scale-on-hover:hover {
+    transform: scale(1.05);
+}
+
+.grayscale-hover img {
+    filter: grayscale(0.8) contrast(1.2);
+    opacity: 0.6;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.grayscale-hover img:hover {
+    filter: grayscale(0) contrast(1);
+    opacity: 1;
+    transform: translateY(-5px) scale(1.1);
+}
+
+.qr-container {
+    transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.qr-container:hover {
+    box-shadow: 0 40px 60px rgba(16, 185, 129, 0.2) !important;
+}
+
+.transition-all {
+    transition: all 0.4s ease;
+}
+
+/* Premium Invoice Header Styles */
+.invoice-premium-header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    padding: 3rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.logo-orb {
+    width: 54px;
+    height: 54px;
+    background: linear-gradient(135deg, var(--primary), #059669);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: white;
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3), 0 0 20px rgba(16, 185, 129, 0.2);
+}
+
+.badge-premium {
+    all: unset;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: var(--primary);
+    padding: 0.6rem 1.4rem;
+    border-radius: 50px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* UPI Terminal Styles */
+.upi-settlement-terminal {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-radius: 40px;
+    padding: 1rem;
+    margin-bottom: 3rem;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: hidden;
+}
+
+.terminal-inner {
+    padding: 4rem 2rem;
+    text-align: center;
+}
+
+.merchant-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1.2rem;
+    background: rgba(16, 185, 129, 0.08);
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--primary-dark);
+    letter-spacing: 1px;
+}
+
+.qr-orb {
+    position: relative;
+    display: inline-block;
+    padding: 2rem;
+    background: white;
+    border-radius: 40px;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.qr-image {
+    width: 240px;
+    height: 240px;
+    border-radius: 12px;
+}
+
+.qr-scanner-line {
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    width: 240px;
+    height: 2px;
+    background: var(--primary);
+    box-shadow: 0 0 15px var(--primary);
+    animation: scanLines 3s ease-in-out infinite;
+    z-index: 10;
+}
+
+@keyframes scanLines {
+
+    0%,
+    100% {
+        transform: translateY(0);
+        opacity: 0;
+    }
+
+    10%,
+    90% {
+        opacity: 1;
+    }
+
+    50% {
+        transform: translateY(238px);
+    }
+}
+
+.icon-orb-sm {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.bg-emerald-soft {
+    background: rgba(16, 185, 129, 0.08);
+}
+
+.merchant-name {
+    color: #1e293b;
+    letter-spacing: -1px;
+}
+
+.display-4 {
+    letter-spacing: -2px;
+}
+
+.ls-wide {
+    letter-spacing: 2px;
+}
+
+.fw-600 {
+    font-weight: 600;
 }

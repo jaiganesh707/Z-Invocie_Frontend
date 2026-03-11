@@ -186,6 +186,12 @@ export class StakeholderHubComponent implements OnInit, OnDestroy {
   activeTab = signal<string>('analytics');
   isAdding = signal<boolean>(false);
 
+  nodeConfig = {
+    upiId: '',
+    payeeName: '',
+    currency: 'INR'
+  };
+
   // Billing Archive State
   startDate = signal<string>('');
   endDate = signal<string>('');
@@ -253,6 +259,11 @@ export class StakeholderHubComponent implements OnInit, OnDestroy {
   fetchUser() {
     this.userService.users$.subscribe(users => {
       this.user = users.find(u => u.id === this.userId());
+      if (this.user) {
+        this.nodeConfig.upiId = this.user.upiId || '';
+        this.nodeConfig.payeeName = this.user.payeeName || '';
+        this.nodeConfig.currency = this.user.currency || 'INR';
+      }
     });
   }
 
@@ -307,6 +318,30 @@ export class StakeholderHubComponent implements OnInit, OnDestroy {
 
   updateConfig() {
     this.toastService.show('Billing configuration updated for user', 'success');
+  }
+
+  saveNodeConfig() {
+    if (!this.user) return;
+    const updatePayload = {
+      username: this.user.username,
+      email: this.user.email,
+      contactNumber: this.user.contactNumber,
+      role: this.user.role,
+      upiId: this.nodeConfig.upiId,
+      payeeName: this.nodeConfig.payeeName,
+      currency: this.nodeConfig.currency
+    };
+    this.userService.updateUser(this.userId(), updatePayload).subscribe({
+      next: () => this.toastService.show('Node settlement configuration synchronized.', 'success'),
+      error: () => this.toastService.show('Failed to update config. Verify backend connection.', 'error')
+    });
+  }
+
+  get previewQrUrl(): string {
+    if (!this.nodeConfig.upiId) return '';
+    const name = this.nodeConfig.payeeName || this.user?.username || 'Stakeholder';
+    const upiString = `upi://pay?pa=${this.nodeConfig.upiId}&pn=${encodeURIComponent(name)}&am=1.00&cu=${this.nodeConfig.currency}&tn=Config_Preview`;
+    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiString)}`;
   }
 
   printInvoice(invoice: Invoice) {
@@ -395,6 +430,17 @@ export class StakeholderHubComponent implements OnInit, OnDestroy {
     this.isAdding.set(false);
     this.editingId = null;
     this.selectedFile = null;
+  }
+
+  deleteInvoice(id: number) {
+    if (confirm('Permanently purge this financial record from the ledger? This action is irreversible.')) {
+      this.invoiceService.delete(id).subscribe({
+        next: () => {
+          this.toastService.show('Financial record purged successfully.', 'success');
+          this.fetchInvoices();
+        }
+      });
+    }
   }
 
   getImageUrl(url: string | undefined): string {

@@ -37,10 +37,12 @@ export class AuthInterceptor implements HttpInterceptor {
                     this.router.navigate(['/login']);
                 } else if (error.status === 403) {
                     this.toastService.error(errorMessage || 'Access Denied: You do not have permission.');
+                } else if (error.status === 413) {
+                    this.toastService.error('Upload Error: File is too large for the system.');
                 } else if (error.status === 0) {
                     this.toastService.error('Network error: Server is unreachable.');
                 } else {
-                    this.toastService.error(errorMessage);
+                    this.toastService.error(errorMessage || 'Operation failed.');
                 }
                 return throwError(() => error);
             })
