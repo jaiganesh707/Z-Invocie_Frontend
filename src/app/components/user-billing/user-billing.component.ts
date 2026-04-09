@@ -6,12 +6,16 @@ import { FoodItemService } from '../../services/food-item.service';
 import { InvoiceService } from '../../services/invoice.service';
 import { UserService } from '../../services/user.service';
 import { ToastService } from '../../services/toast.service';
+import { TaxService, CustomTax } from '../../services/tax.service';
 import { FoodItem } from '../../models/food-item.model';
 import { CreateInvoiceDto } from '../../models/invoice.model';
 
 import { interval, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+
+
+import { AuthService } from '../../services/auth.service';
 
 @Component({
     selector: 'app-user-billing',
@@ -33,6 +37,12 @@ export class UserBillingComponent implements OnInit, OnDestroy {
     isLoading = false;
     upiPaid = false;
     searchQuery: string = '';
+
+    // Taxes
+    activeTaxes: CustomTax[] = [];
+    subtotal: number = 0;
+    taxAmount: number = 0;
+
     private destroy$ = new Subject<void>();
 
     constructor(
@@ -41,7 +51,9 @@ export class UserBillingComponent implements OnInit, OnDestroy {
         private userService: UserService,
         private foodItemService: FoodItemService,
         private invoiceService: InvoiceService,
+        private taxService: TaxService,
         private toastService: ToastService,
+        private authService: AuthService,
         private cdr: ChangeDetectorRef
     ) { }
 
@@ -54,6 +66,7 @@ export class UserBillingComponent implements OnInit, OnDestroy {
                 this.reset();
                 this.fetchFoodItems();
                 this.fetchUserData();
+                this.fetchActiveTaxes();
             } else {
                 this.toastService.error('Invalid Session: Stakeholder ID not identified. Redirecting...');
                 this.router.navigate(['/super-admin']);
@@ -103,6 +116,19 @@ export class UserBillingComponent implements OnInit, OnDestroy {
         });
     }
 
+    fetchActiveTaxes(): void {
+        this.taxService.getActiveTaxes(this.userId).subscribe({
+            next: taxes => {
+                this.activeTaxes = taxes || [];
+                this.calculateTotal(); // Re-calculate to safely include taxes
+                this.cdr.detectChanges();
+            },
+            error: () => {
+                console.error("Failed to load active taxes for billing");
+            }
+        });
+    }
+
     get filteredFoodItems(): FoodItem[] {
         if (!this.searchQuery) return this.foodItems;
         const q = this.searchQuery.toLowerCase();
@@ -137,7 +163,10 @@ export class UserBillingComponent implements OnInit, OnDestroy {
     }
 
     calculateTotal(): void {
-        this.totalAmount = this.selectedItems.reduce((acc, curr) => acc + (curr.foodItem.price * curr.quantity), 0);
+        this.subtotal = this.selectedItems.reduce((acc, curr) => acc + (curr.foodItem.price * curr.quantity), 0);
+        let totalTaxPercentage = this.activeTaxes.reduce((sum, tax) => sum + Number(tax.percentage), 0);
+        this.taxAmount = (this.subtotal * totalTaxPercentage) / 100;
+        this.totalAmount = this.subtotal + this.taxAmount;
     }
 
     generateBill(mode: 'cash' | 'upi' = 'cash'): void {
@@ -157,8 +186,10 @@ export class UserBillingComponent implements OnInit, OnDestroy {
             return;
         }
 
+        const currentUser = this.authService.getCurrentUser();
         const dto: CreateInvoiceDto = {
             userId: this.userId,
+            creatorId: currentUser?.id,
             items: this.selectedItems.map(si => ({
                 foodItemId: si.foodItem.id!,
                 quantity: si.quantity
@@ -167,16 +198,20 @@ export class UserBillingComponent implements OnInit, OnDestroy {
 
         this.invoiceService.create(dto).subscribe({
             next: data => {
-                this.toastService.success('Bill generated and verified successfully.');
+                const message = (data.status === 'PENDING_APPROVAL') 
+                    ? 'Invoice submitted for verification.' 
+                    : 'Bill generated and verified successfully.';
+                
+                this.toastService.success(message);
                 this.isGenerated = true;
                 this.generatedInvoice = data;
-                this.upiPaid = false; // Reset for new UPI transaction
+                this.upiPaid = false; 
 
-                if (this.paymentMode === 'upi' && this.user && this.user.upiId) {
+                if (this.generatedInvoice.status === 'APPROVED' && this.paymentMode === 'upi' && this.user && this.user.upiId) {
                     const invoiceId = this.generatedInvoice.id;
                     const upiString = `upi://pay?pa=${this.user.upiId}&pn=${encodeURIComponent(this.user.payeeName || this.user.username)}&am=${this.totalAmount}&cu=${this.user.currency || 'INR'}&tn=Invoice_${invoiceId}`;
                     this.upiQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiString)}`;
-                } else if (this.paymentMode === 'upi') {
+                } else if (this.generatedInvoice.status === 'APPROVED' && this.paymentMode === 'upi') {
                     this.toastService.show('Node has no UPI configuration! Falling back to standard invoice.', 'warning');
                 }
             },
@@ -210,6 +245,8 @@ export class UserBillingComponent implements OnInit, OnDestroy {
 
     reset(): void {
         this.selectedItems = [];
+        this.subtotal = 0;
+        this.taxAmount = 0;
         this.totalAmount = 0;
         this.isGenerated = false;
         this.generatedInvoice = null;

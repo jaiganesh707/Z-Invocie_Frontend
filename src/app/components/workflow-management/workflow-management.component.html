@@ -1,0 +1,283 @@
+<div class="container-fluid py-5 min-vh-100 animate-fade">
+    <div class="workflow-container mx-auto" style="max-width: 1400px;">
+        <!-- Header Section -->
+        <header class="d-flex justify-content-between align-items-center mb-5 pb-5 border-bottom border-glass">
+            <div class="brand-block">
+                <h2 class="display-5 fw-bold text-white mb-0 ls-tight tracking-tight">Workflow Intelligence</h2>
+                <div class="d-flex align-items-center mt-1">
+                    <div class="status-dot pulse-blue me-2"></div>
+                    <p class="text-blue small mb-0 fw-bold opacity-75">GOVERNING NODE: <span
+                            class="text-white text-uppercase">{{ currentUser?.username || 'INITIALIZING' }}</span></p>
+                    <div class="mx-3 border-start border-glass h-15px"></div>
+                    <p class="text-blue small mb-0 fw-bold opacity-75">OPERATIONAL NODES: <span class="text-emerald">{{
+                            subUsers().length }} ACTIVE</span></p>
+                </div>
+            </div>
+            <button class="btn btn-premium-blue rounded-pill px-4 py-3" (click)="toggleForm()">
+                <i class="bi" [class.bi-plus-lg]="!isFormVisible()" [class.bi-x-lg]="isFormVisible()"></i>
+                {{ isFormVisible() ? 'TERMINATE PROVISIONING' : 'PROVISION WORKFLOW UNIT' }}
+            </button>
+        </header>
+        <!-- Summary Stat Boxes -->
+        <div class="row g-4 mb-5 animate-slide">
+            <div class="col-md-6">
+                <div class="glass-card p-4 border-emerald-soft bg-emerald-soft h-100">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stat-label text-emerald small fw-bold text-uppercase ls-wide mb-1">Total Unit
+                                Distribution</div>
+                            <h3 class="text-white fw-black mb-0">{{ creators().length }} Invoice Creators</h3>
+                        </div>
+                        <div class="icon-orb bg-emerald p-3" (click)="toggleForm()" style="cursor: pointer;">
+                            <i class="bi bi-plus-lg text-white fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="glass-card p-4 border-blue-soft bg-blue-soft h-100">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stat-label text-blue small fw-bold text-uppercase ls-wide mb-1">Verification
+                                Force</div>
+                            <h3 class="text-white fw-black mb-0">{{ approvers().length }} Approvers</h3>
+                        </div>
+                        <div class="icon-orb bg-blue p-3" (click)="toggleForm()" style="cursor: pointer;">
+                            <i class="bi bi-shield-plus text-white fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div *ngIf="isLoading()" class="text-center py-5">
+            <div class="spinner-border text-blue" role="status">
+                <span class="visually-hidden">Syncing nodes...</span>
+            </div>
+            <p class="text-blue-dim mt-3 ls-wide small">SYNCHRONIZING OPERATIONAL NODES...</p>
+        </div>
+
+        <!-- Unit Provisioning Form -->
+        <div *ngIf="!isLoading() && isFormVisible()" class="glass-card p-5 mb-5 animate-slide">
+            <div class="d-flex align-items-center mb-5">
+                <div class="icon-orb bg-blue me-3">
+                    <i class="bi" [class.bi-person-gear]="!isEditing()" [class.bi-pencil-square]="isEditing()"></i>
+                </div>
+                <div>
+                    <h4 class="mb-1 text-white ls-tight">{{ isEditing() ? 'Update Unit Parameters' : 'Initialize New
+                        Intelligence Node' }}</h4>
+                    <p class="text-blue-dim small mb-0">Configure operational role and secure access credentials</p>
+                </div>
+            </div>
+
+            <form (ngSubmit)="onSubmit()" #userFormRef="ngForm">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label for="username" class="form-label ls-wide small opacity-75">Unit Identifier (Username)
+                            *</label>
+                        <div class="input-group glass rounded-3 overflow-hidden">
+                            <span class="input-group-text bg-transparent border-0 text-muted"><i
+                                    class="bi bi-hash"></i></span>
+                            <input type="text" id="username" class="form-control bg-transparent border-0 text-white p-3"
+                                [ngModel]="userForm().username"
+                                (ngModelChange)="userForm.set({...userForm(), username: $event})" name="username"
+                                required placeholder="approver_alpha" autocomplete="username">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="email" class="form-label ls-wide small opacity-75">Secure Communication (Email)
+                            *</label>
+                        <div class="input-group glass rounded-3 overflow-hidden">
+                            <span class="input-group-text bg-transparent border-0 text-muted"><i
+                                    class="bi bi-envelope"></i></span>
+                            <input type="email" id="email" class="form-control bg-transparent border-0 text-white p-3"
+                                [ngModel]="userForm().email"
+                                (ngModelChange)="userForm.set({...userForm(), email: $event})" name="email" required
+                                placeholder="unit@z-finance.com" autocomplete="email">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="password" class="form-label ls-wide small opacity-75">{{ isEditing() ? 'Update
+                            Access Key (Leave blank to keep current)' : 'Initialize Access Key (Password) *' }}</label>
+                        <div class="input-group glass rounded-3 overflow-hidden">
+                            <span class="input-group-text bg-transparent border-0 text-muted"><i
+                                    class="bi bi-key"></i></span>
+                            <input type="password" id="password"
+                                class="form-control bg-transparent border-0 text-white p-3"
+                                [ngModel]="userForm().password"
+                                (ngModelChange)="userForm.set({...userForm(), password: $event})" name="password"
+                                [required]="!isEditing()" placeholder="••••••••" autocomplete="new-password">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="role" class="form-label ls-wide small opacity-75">Operational Role *</label>
+                        <div class="input-group glass rounded-3 overflow-hidden">
+                            <span class="input-group-text bg-transparent border-0 text-muted"><i
+                                    class="bi bi-diagram-3"></i></span>
+                            <select id="role" class="form-select bg-transparent border-0 text-white p-3 shadow-none"
+                                [ngModel]="userForm().role"
+                                (ngModelChange)="userForm.set({...userForm(), role: $event})" name="role" required>
+                                <option value="ROLE_WORKFLOW_USER">Workflow User (Invoice Creator)</option>
+                                <option value="ROLE_APPROVER">Approver (Payment Validator)</option>
+                                <option value="ROLE_HR">HR Hub (Personnel Manager)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <label for="contactNumber" class="form-label ls-wide small opacity-75">Contact Vector Number
+                            *</label>
+                        <div class="input-group glass rounded-3 overflow-hidden">
+                            <span class="input-group-text bg-transparent border-0 text-muted"><i
+                                    class="bi bi-telephone"></i></span>
+                            <input type="tel" id="contactNumber"
+                                class="form-control bg-transparent border-0 text-white p-3"
+                                [ngModel]="userForm().contactNumber"
+                                (ngModelChange)="userForm.set({...userForm(), contactNumber: $event})"
+                                name="contactNumber" required placeholder="+91 00000 00000" autocomplete="tel">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mt-5 gap-3">
+                    <button type="button" class="btn btn-premium-outline rounded-pill px-4"
+                        (click)="toggleForm()">ABORT</button>
+                    <button type="submit" class="btn btn-premium-blue shadow-blue px-5 py-3 rounded-pill"
+                        [disabled]="!userFormRef.form.valid">
+                        {{ isEditing() ? 'SYNCHRONIZE UNIT' : 'PROVISION UNIT' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Authorized Units List - Grouped by Role -->
+        <div class="row g-4">
+            <!-- Creator Nodes Section -->
+            <div class="col-xl-4">
+                <div class="glass-card h-100 animate-slide" style="animation-delay: 0.1s">
+                    <div
+                        class="p-4 d-flex align-items-center justify-content-between border-bottom border-glass bg-glass-dark">
+                        <div class="d-flex align-items-center text-emerald">
+                            <i class="bi bi-person-plus-fill fs-4 me-2"></i>
+                            <h5 class="mb-0 fw-bold ls-tight">INVOICE CREATORS</h5>
+                        </div>
+                        <span class="badge bg-emerald-soft text-emerald rounded-pill">{{ creators().length }}
+                            ACTIVE</span>
+                    </div>
+                    <div class="p-0 scroll-custom" style="max-height: 400px;">
+                        <div *ngFor="let user of creators()"
+                            class="p-4 border-bottom border-glass-soft hover-glass-light transition-all">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-hub-sm me-3 border border-emerald">
+                                        <i class="bi bi-person-plus-fill text-emerald"></i>
+                                    </div>
+                                    <div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <h6 class="mb-0 text-white fw-bold">{{ user.username }}</h6>
+                                            <span class="badge bg-emerald-soft text-emerald x-small p-1 px-2 border border-emerald border-opacity-10">{{ user.uniqueKey }}</span>
+                                        </div>
+                                        <small class="text-emerald small opacity-75">{{ user.email }}</small>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-glass-blue text-white rounded-circle p-2"
+                                        (click)="onEdit(user)"><i class="bi bi-pencil-fill"></i></button>
+                                    <button class="btn btn-sm btn-glass-rose text-danger rounded-circle p-2"
+                                        (click)="onDelete(user.id)"><i class="bi bi-trash-fill"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div *ngIf="creators().length === 0" class="p-5 text-center text-muted opacity-50">
+                            NO CREATOR NODES
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Approver Nodes Section -->
+            <div class="col-xl-4">
+                <div class="glass-card h-100 animate-slide" style="animation-delay: 0.2s">
+                    <div
+                        class="p-4 d-flex align-items-center justify-content-between border-bottom border-glass bg-glass-dark">
+                        <div class="d-flex align-items-center text-blue">
+                            <i class="bi bi-person-check-fill fs-4 me-2"></i>
+                            <h5 class="mb-0 fw-bold ls-tight">APPROVERS</h5>
+                        </div>
+                        <span class="badge bg-blue-soft text-blue rounded-pill">{{ approvers().length }} ACTIVE</span>
+                    </div>
+                    <div class="p-0 scroll-custom" style="max-height: 400px;">
+                        <div *ngFor="let user of approvers()"
+                            class="p-4 border-bottom border-glass-soft hover-glass-light transition-all">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-hub-sm me-3 border border-blue">
+                                        <i class="bi bi-person-check-fill text-blue"></i>
+                                    </div>
+                                    <div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <h6 class="mb-0 text-white fw-bold">{{ user.username }}</h6>
+                                            <span class="badge bg-blue-soft text-blue x-small p-1 px-2 border border-blue border-opacity-10">{{ user.uniqueKey }}</span>
+                                        </div>
+                                        <small class="text-blue small opacity-75">{{ user.email }}</small>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-glass-blue text-white rounded-circle p-2"
+                                        (click)="onEdit(user)"><i class="bi bi-pencil-fill"></i></button>
+                                    <button class="btn btn-sm btn-glass-rose text-danger rounded-circle p-2"
+                                        (click)="onDelete(user.id)"><i class="bi bi-trash-fill"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div *ngIf="approvers().length === 0" class="p-5 text-center text-muted opacity-50">
+                            NO APPROVER NODES
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HR Unit Nodes Section -->
+            <div class="col-xl-4">
+                <div class="glass-card h-100 animate-slide" style="animation-delay: 0.3s">
+                    <div
+                        class="p-4 d-flex align-items-center justify-content-between border-bottom border-glass bg-glass-dark">
+                        <div class="d-flex align-items-center text-warning">
+                            <i class="bi bi-microsoft fs-4 me-2"></i>
+                            <h5 class="mb-0 fw-bold ls-tight">HR UNITS</h5>
+                        </div>
+                        <span class="badge bg-warning-soft text-warning rounded-pill">{{ hrs().length }} ACTIVE</span>
+                    </div>
+                    <div class="p-0 scroll-custom" style="max-height: 400px;">
+                        <div *ngFor="let user of hrs()"
+                            class="p-4 border-bottom border-glass-soft hover-glass-light transition-all">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-hub-sm me-3 border border-warning">
+                                        <i class="bi bi-microsoft text-warning"></i>
+                                    </div>
+                                    <div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <h6 class="mb-0 text-white fw-bold">{{ user.username }}</h6>
+                                            <span class="badge bg-warning-soft text-warning x-small p-1 px-2 border border-warning border-opacity-10">{{ user.uniqueKey }}</span>
+                                        </div>
+                                        <small class="text-white small opacity-75">{{ user.email }}</small>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-glass-blue text-white rounded-circle p-2"
+                                        (click)="onEdit(user)"><i class="bi bi-pencil-fill"></i></button>
+                                    <button class="btn btn-sm btn-glass-rose text-danger rounded-circle p-2"
+                                        (click)="onDelete(user.id)"><i class="bi bi-trash-fill"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div *ngIf="hrs().length === 0" class="p-3 text-center text-white opacity-50">
+                            NO HR NODES PROVISIONED
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

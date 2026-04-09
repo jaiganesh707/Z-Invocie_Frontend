@@ -15,8 +15,9 @@
                     </div>
                 </div>
             </div>
-            <div class="d-none d-lg-block">
-                <div class="badge-premium shadow-emerald">
+            <div class="d-flex gap-3">
+
+                <div class="badge-premium shadow-emerald d-none d-lg-block">
                     <i class="bi bi-hdd-network me-2"></i> NODE TERMINAL ONLINE
                 </div>
             </div>
@@ -42,8 +43,20 @@
                 </button>
             </li>
             <li class="nav-item">
+                <button class="nav-link" [class.active]="activeTab() === 'taxes'" (click)="activeTab.set('taxes')">
+                    <i class="bi bi-percent me-2"></i> TAX MATRICES
+                </button>
+            </li>
+            <li class="nav-item">
                 <button class="nav-link" [class.active]="activeTab() === 'billing'" (click)="setTab('billing')">
                     <i class="bi bi-receipt me-2"></i> BILLING CHECK
+                </button>
+            </li>
+
+            <li class="nav-item">
+                <button class="nav-link" [class.active]="activeTab() === 'settings'"
+                    (click)="activeTab.set('settings')">
+                    <i class="bi bi-gear-fill me-2"></i> SETTINGS
                 </button>
             </li>
         </ul>
@@ -253,6 +266,114 @@
                 </div>
             </div>
 
+            <!-- Custom Taxes Tab -->
+            <div *ngSwitchCase="'taxes'" class="animate-fade">
+                <div class="d-flex justify-content-between align-items-center mb-5">
+                    <div>
+                        <h4 class="text-white fw-bold mb-1 ls-tight">Tax Matrix Configuration</h4>
+                        <p class="text-emerald small mb-0 opacity-50 fw-bold ls-wide">CUSTOM SURCHARGES & TAXATION
+                            PROTOCOLS</p>
+                    </div>
+                    <button class="btn-premium px-5 py-3 rounded-pill shadow-emerald" (click)="isAddingTax.set(true)"
+                        *ngIf="!isAddingTax()">
+                        <i class="bi bi-plus-lg me-2"></i> INITIALIZE NEW TAXON
+                    </button>
+                </div>
+
+                <div *ngIf="isAddingTax()" class="glass-card p-5 mb-5 border-emerald shadow-emerald animate-slide"
+                    style="border-radius: 32px;">
+                    <div class="d-flex justify-content-between align-items-center mb-5">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-box bg-emerald bg-opacity-10 me-3" style="width: 50px; height: 50px;">
+                                <i class="bi bi-percent text-emerald fs-4"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-white mb-0 ls-tight">{{ editingTaxId ? 'Update' : 'Initialize' }} Taxon
+                                    Constraint</h4>
+                                <p class="text-emerald small mb-0 opacity-75">Define surcharge parameters (e.g. GST,
+                                    SGST, Service Charge)</p>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm glass text-emerald rounded-pill px-4" (click)="resetTaxForm()"
+                            style="border: 1px solid rgba(16, 185, 129, 0.3);">
+                            <i class="bi bi-x-lg me-2"></i> CANCEL
+                        </button>
+                    </div>
+
+                    <form class="row g-4" (ngSubmit)="saveTax()">
+                        <div class="col-lg-6">
+                            <label class="form-label ls-wide small fw-bold text-emerald opacity-100 mb-2">TAXON
+                                NOMENCLATURE</label>
+                            <input type="text" class="form-control p-3 bg-glass border-glass text-white" name="taxName"
+                                [(ngModel)]="newTax.name" placeholder="e.g. State GST" required>
+                        </div>
+                        <div class="col-lg-6">
+                            <label class="form-label ls-wide small fw-bold text-emerald opacity-100 mb-2">PERCENTAGE
+                                QUANTUM (%)</label>
+                            <input type="number" class="form-control p-3 bg-glass border-glass text-white"
+                                name="taxPercent" [(ngModel)]="newTax.percentage" placeholder="2.5" step="0.01"
+                                required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label ls-wide small fw-bold text-emerald opacity-100 mb-2">TAXON
+                                SYNOPSIS</label>
+                            <input type="text" class="form-control p-3 bg-glass border-glass text-white" name="taxDesc"
+                                [(ngModel)]="newTax.description"
+                                placeholder="Brief description of when this applies...">
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch mt-2">
+                                <input class="form-check-input bg-emerald border-0 border-glass" type="checkbox"
+                                    role="switch" id="taxActiveSwitch" name="taxActive" [(ngModel)]="newTax.isActive">
+                                <label class="form-check-label text-white small" for="taxActiveSwitch">ACTIVATE TAXON IN
+                                    SETTLEMENT PIPELINE</label>
+                            </div>
+                        </div>
+                        <div class="col-12 text-end mt-4">
+                            <button type="submit"
+                                class="btn-primary btn px-5 py-3 rounded-pill fw-bold shadow-emerald hover-lift">
+                                <i class="bi bi-save me-2"></i> {{ editingTaxId ? 'COMMIT OVERRIDE' : 'ACTIVATE TAXON'
+                                }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tax List -->
+                <div class="row g-4 mb-5">
+                    <div class="col-xl-4 col-md-6" *ngFor="let tax of taxes()">
+                        <div
+                            class="glass-card p-4 border-glass shadow-inner h-100 d-flex flex-column position-relative overflow-hidden">
+                            <div class="position-absolute top-0 end-0 p-3">
+                                <span class="badge"
+                                    [ngClass]="tax.isActive ? 'bg-emerald text-dark' : 'bg-secondary text-white'">
+                                    {{ tax.isActive ? 'ACTIVE' : 'DORMANT' }}
+                                </span>
+                            </div>
+
+                            <h5 class="text-white fw-bold mb-1">{{ tax.name }}</h5>
+                            <p class="text-gold h2 fw-bold mb-3 ls-tight">{{ tax.percentage }}%</p>
+
+                            <p class="text-muted text-emerald small opacity-75 mb-4 flex-grow-1">
+                                {{ tax.description || 'No summary registered for this constraint.' }}
+                            </p>
+
+                            <div class="d-flex justify-content-end gap-2 mt-auto">
+                                <button
+                                    class="btn btn-sm glass border-glass text-white rounded-pill px-3 py-2 hover-lift"
+                                    (click)="editTax(tax)">
+                                    <i class="bi bi-pencil-square me-1"></i> EDIT
+                                </button>
+                                <button class="btn btn-sm glass border-rose text-rose rounded-pill px-3 py-2 hover-lift"
+                                    (click)="deleteTax(tax.id!)">
+                                    <i class="bi bi-trash3 me-1"></i> PURGE
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Node Config Tab -->
             <div *ngSwitchCase="'config'" class="animate-fade">
                 <div class="glass-card p-5 border-emerald shadow-emerald"
@@ -386,70 +507,173 @@
                     </div>
 
                     <div *ngIf="!isLoadingInvoices()" class="animate-fade">
-                        <div class="table-responsive rounded-4 overflow-hidden border border-glass">
-                            <table class="table table-dark table-hover mb-0">
-                                <thead>
-                                    <tr class="bg-glass text-muted opacity-75">
-                                        <th class="ps-4 py-4 ls-wide small">ARCHIVE IDENTITY</th>
-                                        <th class="py-4 ls-wide small">TIMESTAMP</th>
-                                        <th class="py-4 text-center ls-wide small">NODE ASSETS</th>
-                                        <th class="pe-4 py-4 text-end ls-wide small">REALIZED VALUE</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr *ngFor="let inv of invoices()" class="border-glass align-middle">
-                                        <td class="ps-4 py-4">
-                                            <div class="d-flex align-items-center">
-                                                <div class="icon-box bg-emerald bg-opacity-10 me-3"
-                                                    style="width: 40px; height: 40px; border-radius: 12px;">
-                                                    <i class="bi bi-receipt text-emerald"></i>
-                                                </div>
-                                                <div>
-                                                    <div class="text-white fw-bold">INV-{{ inv.id }}</div>
-                                                    <div class="text-white small opacity-50">#STRAT-NODE-{{ inv.id }}
+                        <!-- SECTION 1: PRIME SETTLEMENTS -->
+                        <div class="mb-5">
+                            <h5 class="text-emerald small ls-wide fw-bold mb-3 opacity-75">
+                                <i class="bi bi-person-badge me-2"></i> DIRECT STAKEHOLDER SETTLEMENTS
+                            </h5>
+                            <div
+                                class="table-responsive rounded-4 overflow-hidden border border-emerald border-opacity-25 bg-glass mb-4">
+                                <table class="table table-dark table-hover mb-0">
+                                    <thead>
+                                        <tr class="bg-emerald bg-opacity-10 text-muted opacity-75">
+                                            <th class="ps-4 py-3 ls-wide small">ARCHIVE IDENTITY</th>
+                                            <th class="py-3 ls-wide small">TIMESTAMP</th>
+                                            <th class="py-3 text-center ls-wide small">SUMMARY</th>
+                                            <th class="pe-4 py-3 text-end ls-wide small">REALIZED VALUE</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let inv of primeInvoices()" class="border-glass align-middle">
+                                            <td class="ps-4 py-4">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="icon-box bg-emerald bg-opacity-10 me-3"
+                                                        style="width: 40px; height: 40px; border-radius: 12px;">
+                                                        <i class="bi bi-receipt text-emerald"></i>
+                                                    </div>
+                                                    <div>
+                                                        <div class="text-white fw-bold">ID: #{{ inv.id }}</div>
+                                                        <div class="text-emerald small opacity-50">DIRECT NODE</div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td class="py-4">
-                                            <div class="text-white small fw-600">{{ inv.createdAt | date:'MMM d, y' }}
-                                            </div>
-                                            <div class="text-gold" style="font-size: 0.7rem;">{{ inv.createdAt |
-                                                date:'HH:mm:ss' }}</div>
-                                        </td>
-                                        <td class="py-4 text-center">
-                                            <div class="d-flex flex-wrap justify-content-center gap-1">
-                                                <span *ngFor="let item of inv.items"
-                                                    class="badge rounded-pill bg-glass border-glass text-emerald small"
-                                                    style="font-size: 0.65rem;">
-                                                    {{ item.foodItem.name }} (x{{ item.quantity }})
+                                            </td>
+                                            <td class="py-4">
+                                                <div class="text-white small fw-600">{{ inv.createdAt | date:'MMM d, y'
+                                                    }}</div>
+                                                <div class="text-gold small opacity-75">{{ inv.createdAt | date:'HH:mm'
+                                                    }}</div>
+                                            </td>
+                                            <td class="py-4 text-center">
+                                                <span class="badge rounded-pill bg-emerald-soft text-emerald small">
+                                                    {{ inv.items.length }} Assets Registered
                                                 </span>
-                                            </div>
-                                        </td>
-                                        <td class="pe-4 py-4 text-end">
-                                            <div class="text-emerald fw-bold fs-5">₹{{ inv.totalAmount | number:'1.2-2'
-                                                }}</div>
-                                            <div class="d-flex flex-column align-items-end gap-2 mt-1">
-                                                <button class="btn btn-sm glass border-glass text-white small p-1 w-100"
-                                                    style="font-size: 0.65rem;">
-                                                    <i class="bi bi-printer me-1"></i> PRINT LOG
-                                                </button>
-                                                <button (click)="deleteInvoice(inv.id!)"
-                                                    class="btn btn-sm glass border-rose text-rose small p-1 w-100"
-                                                    style="font-size: 0.65rem;">
-                                                    <i class="bi bi-trash3 me-1"></i> PURGE RECORD
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr *ngIf="invoices().length === 0">
-                                        <td colspan="4" class="py-5 text-center opacity-25">
-                                            <i class="bi bi-search fs-1 d-block mb-3"></i>
-                                            <p class="ls-wide small">NO ARCHIVE RECORDS MATCHING CRITERIA</p>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                                            </td>
+                                            <td class="pe-4 py-4 text-end">
+                                                <div class="text-emerald fw-bold fs-5">₹{{ inv.totalAmount |
+                                                    number:'1.2-2' }}</div>
+                                                <div class="d-flex justify-content-end gap-2 mt-2">
+                                                    <button class="btn btn-sm glass border-glass text-white btn-action"
+                                                        (click)="printInvoice(inv)">
+                                                        <i class="bi bi-printer"></i>
+                                                    </button>
+                                                    <button (click)="deleteInvoice(inv.id!)"
+                                                        class="btn btn-sm glass border-rose text-rose btn-action">
+                                                        <i class="bi bi-trash3"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr *ngIf="primeInvoices().length === 0">
+                                            <td colspan="4" class="py-5 text-center opacity-25">NO DIRECT ARCHIVE
+                                                RECORDS</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Unit Delegation Tab (Staff Management) -->
+            <div *ngSwitchCase="'delegation'" class="animate-fade">
+                <div class="row g-4">
+                    <!-- Staff Provisioning Form -->
+                    <div class="col-xl-4">
+                        <div class="glass-card p-5 border-emerald shadow-emerald" style="border-radius: 28px;">
+
+
+            <!-- Settings Tab -->
+            <div *ngSwitchCase="'settings'" class="animate-fade">
+                <div class="row g-4">
+                    <div class="col-xl-9 mx-auto">
+                        <div class="glass-card p-5 border-emerald shadow-emerald" style="border-radius: 32px;">
+                            <div class="d-flex align-items-center mb-5 border-bottom border-glass pb-4">
+                                <div class="icon-orb-sm bg-emerald me-3">
+                                    <i class="bi bi-shield-lock-fill"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-white mb-0 ls-tight">Security & Account Governance</h4>
+                                    <p class="text-emerald small mb-0 opacity-75">Modify security scopes and identity
+                                        metadata for this node</p>
+                                </div>
+                            </div>
+
+                            <form (ngSubmit)="saveAccountSettings()" class="row g-4">
+                                <div class="col-md-6">
+                                    <label class="form-label ls-wide small opacity-75">STAKEHOLDER IDENTITY</label>
+                                    <div class="input-group glass rounded-3 overflow-hidden border-glass">
+                                        <span class="input-group-text bg-transparent border-0 text-muted"><i
+                                                class="bi bi-person"></i></span>
+                                        <input type="text" class="form-control bg-transparent border-0 text-white p-3"
+                                            name="username" [(ngModel)]="settingsForm.username" placeholder="Username"
+                                            required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label ls-wide small opacity-75">SECURE EMAIL</label>
+                                    <div class="input-group glass rounded-3 overflow-hidden border-glass">
+                                        <span class="input-group-text bg-transparent border-0 text-muted"><i
+                                                class="bi bi-envelope"></i></span>
+                                        <input type="email" class="form-control bg-transparent border-0 text-white p-3"
+                                            name="email" [(ngModel)]="settingsForm.email"
+                                            placeholder="email@address.com" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label ls-wide small opacity-75">AUTHORIZATION SCOPE</label>
+                                    <div class="input-group glass rounded-3 overflow-hidden border-glass" [class.opacity-50]="!isSuperAdmin">
+                                        <span class="input-group-text bg-transparent border-0 text-muted"><i
+                                                class="bi bi-shield-check"></i></span>
+                                        <select
+                                            class="form-select bg-transparent border-0 text-white p-3 shadow-none overflow-hidden"
+                                            name="role" [(ngModel)]="settingsForm.role" [disabled]="!isSuperAdmin" required>
+                                            <option *ngFor="let role of roles" [value]="role">{{ role.replace('ROLE_',
+                                                '') }} SECURITY</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label ls-wide small opacity-75">CONTACT NUMBER</label>
+                                    <div class="input-group glass rounded-3 overflow-hidden border-glass">
+                                        <span class="input-group-text bg-transparent border-0 text-muted"><i
+                                                class="bi bi-telephone"></i></span>
+                                        <input type="text" class="form-control bg-transparent border-0 text-white p-3"
+                                            name="contact" [(ngModel)]="settingsForm.contactNumber"
+                                            placeholder="Contact number">
+                                    </div>
+                                </div>
+
+                                <div class="col-12 mt-5 border-top border-glass pt-5">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h5 class="text-white mb-1">Financial Settlement Settings</h5>
+                                            <p class="text-muted small mb-0">Synchronize UPI and settlement metadata</p>
+                                        </div>
+                                    </div>
+                                    <div class="row g-4 mt-2">
+                                        <div class="col-md-6">
+                                            <label class="form-label ls-wide small opacity-75">UPI VPA</label>
+                                            <input type="text" class="form-control p-3 bg-glass border-glass text-white"
+                                                [(ngModel)]="nodeConfig.upiId" name="upiId"
+                                                placeholder="e.g. ganesh@oksbi">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label ls-wide small opacity-75">PAYEE NAME</label>
+                                            <input type="text" class="form-control p-3 bg-glass border-glass text-white"
+                                                [(ngModel)]="nodeConfig.payeeName" name="payeeName"
+                                                placeholder="Node Payee Name">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 text-end mt-5">
+                                    <button type="submit" class="btn-premium px-5 py-3 rounded-pill shadow-emerald">
+                                        <i class="bi bi-cloud-arrow-up-fill me-2"></i> SYNCHRONIZE SETTINGS
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>

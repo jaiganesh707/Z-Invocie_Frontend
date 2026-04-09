@@ -106,133 +106,145 @@ export class UserAnalyticsComponent implements OnInit, OnDestroy, OnChanges {
     if (this.chart3) this.chart3.destroy();
     if (this.chart4) this.chart4.destroy();
 
+    if (!this.barChartCanvas || !this.pieChartCanvas || !this.expenseChartCanvas) {
+        console.warn('Chart canvases not yet available in DOM');
+        return;
+    }
+
     const ctx1 = this.barChartCanvas.nativeElement.getContext('2d');
     const ctx2 = this.pieChartCanvas.nativeElement.getContext('2d');
     const ctx3 = this.expenseChartCanvas.nativeElement.getContext('2d');
 
-    const labels = this.analyticsData.productSalesStats.map((s: any) => s.productName);
-    const quantities = this.analyticsData.productSalesStats.map((s: any) => s.quantity);
-    const revenues = this.analyticsData.productSalesStats.map((s: any) => s.revenue);
+    const labels = (this.analyticsData.productSalesStats || []).map((s: any) => s.productName);
+    const quantities = (this.analyticsData.productSalesStats || []).map((s: any) => s.quantity);
+    const revenues = (this.analyticsData.productSalesStats || []).map((s: any) => s.revenue);
 
     // Bar Chart - Sales Quantity
-    this.chart1 = new Chart(ctx1, {
-      type: 'bar',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: 'Quantity Sold',
-          data: quantities,
-          backgroundColor: 'rgba(16, 185, 129, 0.6)',
-          borderColor: 'rgba(16, 185, 129, 1)',
-          borderWidth: 1,
-          borderRadius: 8,
-          hoverBackgroundColor: 'rgba(16, 185, 129, 0.8)'
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { display: false }
+    if (ctx1 && labels.length > 0) {
+      this.chart1 = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Quantity Sold',
+            data: quantities,
+            backgroundColor: 'rgba(16, 185, 129, 0.6)',
+            borderColor: 'rgba(16, 185, 129, 1)',
+            borderWidth: 1,
+            borderRadius: 8,
+            hoverBackgroundColor: 'rgba(16, 185, 129, 0.8)'
+          }]
         },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: { color: 'rgba(255,255,255,0.5)' },
-            grid: { color: 'rgba(255,255,255,0.05)' }
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false }
           },
-          x: {
-            ticks: { color: 'rgba(255,255,255,0.8)' },
-            grid: { display: false }
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { color: 'rgba(255,255,255,0.5)' },
+              grid: { color: 'rgba(255,255,255,0.05)' }
+            },
+            x: {
+              ticks: { color: 'rgba(255,255,255,0.8)' },
+              grid: { display: false }
+            }
+          },
+          animation: {
+            duration: 500,
+            easing: 'easeOutQuart'
           }
-        },
-        animation: {
-          duration: 500, // Reduced from 2000 for "Automatic" feel
-          easing: 'easeOutQuart'
         }
-      }
-    });
+      });
+    }
 
     // Doughnut Chart - Revenue Distribution
-    this.chart2 = new Chart(ctx2, {
-      type: 'doughnut',
-      data: {
-        labels: labels,
-        datasets: [{
-          data: revenues,
-          backgroundColor: [
-            'rgba(16, 185, 129, 0.7)',
-            'rgba(59, 130, 246, 0.7)',
-            'rgba(245, 158, 11, 0.7)',
-            'rgba(236, 72, 153, 0.7)',
-            'rgba(139, 92, 246, 0.7)'
-          ],
-          borderWidth: 0,
-          hoverOffset: 20
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'right',
-            labels: {
-              color: 'rgba(255,255,255,0.7)',
-              usePointStyle: true,
-              padding: 20,
-              font: { size: 12 }
-            }
-          }
+    if (ctx2 && labels.length > 0) {
+      this.chart2 = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: revenues,
+            backgroundColor: [
+              'rgba(16, 185, 129, 0.7)',
+              'rgba(59, 130, 246, 0.7)',
+              'rgba(245, 158, 11, 0.7)',
+              'rgba(236, 72, 153, 0.7)',
+              'rgba(139, 92, 246, 0.7)'
+            ],
+            borderWidth: 0,
+            hoverOffset: 20
+          }]
         },
-        cutout: '75%',
-        animation: {
-          animateRotate: true,
-          animateScale: true,
-          duration: 500
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: {
+                color: 'rgba(255,255,255,0.7)',
+                usePointStyle: true,
+                padding: 20,
+                font: { size: 12 }
+              }
+            }
+          },
+          cutout: '75%',
+          animation: {
+            animateRotate: true,
+            animateScale: true,
+            duration: 500
+          }
         }
-      }
-    });
+      });
+    }
 
     // Expense Chart
-    const expenseLabels = this.analyticsData.expenseStats.map((s: any) => s.category);
-    const expenseAmounts = this.analyticsData.expenseStats.map((s: any) => s.amount);
+    const expenseLabels = (this.analyticsData.expenseStats || []).map((s: any) => s.category);
+    const expenseAmounts = (this.analyticsData.expenseStats || []).map((s: any) => s.amount);
 
-    this.chart3 = new Chart(ctx3, {
-      type: 'doughnut',
-      data: {
-        labels: expenseLabels,
-        datasets: [{
-          data: expenseAmounts,
-          backgroundColor: [
-            'rgba(239, 68, 68, 0.7)',
-            'rgba(249, 115, 22, 0.7)',
-            'rgba(250, 204, 21, 0.7)',
-            'rgba(168, 85, 247, 0.7)',
-            'rgba(236, 72, 153, 0.7)'
-          ],
-          borderWidth: 0,
-          hoverOffset: 15
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              color: 'rgba(255,255,255,0.7)',
-              usePointStyle: true,
-              padding: 15
-            }
-          }
+    if (ctx3 && expenseLabels.length > 0) {
+      this.chart3 = new Chart(ctx3, {
+        type: 'doughnut',
+        data: {
+          labels: expenseLabels,
+          datasets: [{
+            data: expenseAmounts,
+            backgroundColor: [
+              'rgba(239, 68, 68, 0.7)',
+              'rgba(249, 115, 22, 0.7)',
+              'rgba(250, 204, 21, 0.7)',
+              'rgba(168, 85, 247, 0.7)',
+              'rgba(236, 72, 153, 0.7)'
+            ],
+            borderWidth: 0,
+            hoverOffset: 15
+          }]
         },
-        cutout: '75%',
-        animation: {
-          animateRotate: true,
-          animateScale: true,
-          duration: 500
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                color: 'rgba(255,255,255,0.7)',
+                usePointStyle: true,
+                padding: 15
+              }
+            }
+          },
+          cutout: '75%',
+          animation: {
+            animateRotate: true,
+            animateScale: true,
+            duration: 500
+          }
         }
-      }
-    });
+      });
+    }
+
 
     // Initialize Prediction Logic if needed for visualization
     if (this.analyticsData.predictions && this.analyticsData.predictions.length > 0) {

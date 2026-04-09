@@ -37,12 +37,12 @@ export class AnalyticsService {
         );
     }
 
-    getStakeholderPerformance(): Observable<any[]> {
-        const cacheKey = `analytics_performance`;
+    getStakeholderPerformance(period: string = 'day'): Observable<any[]> {
+        const cacheKey = `analytics_performance_${period}`;
         const cached = this.cacheService.get<any[]>(cacheKey);
         if (cached) return of(cached);
 
-        return this.http.get<any[]>(`${API_URL}/performance`).pipe(
+        return this.http.get<any[]>(`${API_URL}/performance?period=${period}`).pipe(
             tap(data => this.cacheService.set(cacheKey, data, this.CACHE_TTL))
         );
     }

@@ -1,0 +1,209 @@
+<div class="container-fluid py-3 animate-fade">
+    <div class="customer-hub-container mx-auto" style="max-width: 1400px;">
+
+        <!-- Compact Header -->
+        <header class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-glass">
+            <div class="brand-block">
+                <h4 class="fw-bold text-white mb-0 ls-tight">Customer Network</h4>
+                <div class="d-flex align-items-center mt-1">
+                    <div class="status-dot pulse-emerald me-2"></div>
+                    <p class="text-emerald small mb-0 fw-bold opacity-75">GOVERNING STAKEHOLDERS:
+                        <span class="text-white">{{ customers.length }} ACTIVE NODES</span>
+                    </p>
+                </div>
+            </div>
+            <button class="btn btn-premium rounded-pill px-3 py-2 d-flex align-items-center gap-2" (click)="toggleForm()">
+                <i class="bi" [class.bi-plus-lg]="!isFormVisible" [class.bi-x-lg]="isFormVisible"></i>
+                <span class="d-none d-sm-inline">{{ isFormVisible ? 'CANCEL' : '+ PROVISION NEW CUSTOMER' }}</span>
+            </button>
+        </header>
+
+        <!-- Provisioning Form — Slides in above the list -->
+        <div *ngIf="isFormVisible" class="glass-card p-3 mb-3 animate-slide">
+            <div class="d-flex align-items-center mb-3">
+                <div class="icon-orb-sm bg-emerald me-3">
+                    <i class="bi" [class.bi-person-plus-fill]="!isEditing" [class.bi-pencil-square]="isEditing"></i>
+                </div>
+                <div>
+                    <h6 class="mb-0 text-white ls-tight">{{ isEditing ? 'Update Stakeholder' : 'Initialize New Node' }}</h6>
+                    <p class="text-muted small mb-0" style="font-size:0.72rem">Configure identity and commercial parameters</p>
+                </div>
+            </div>
+
+            <form (ngSubmit)="onSubmit()" #customerFormRef="ngForm">
+                <div class="row g-2">
+                    <div class="col-md-6 col-12">
+                        <label class="form-label ls-wide small opacity-75">Company Name *</label>
+                        <div class="input-group glass rounded-3 overflow-hidden">
+                            <span class="input-group-text bg-transparent border-0 text-muted"><i class="bi bi-building"></i></span>
+                            <input type="text" class="form-control bg-transparent border-0 text-white p-2"
+                                [(ngModel)]="customerForm.companyName" name="companyName" required placeholder="Goliath National Bank">
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-12">
+                        <label class="form-label ls-wide small opacity-75">Contact Person *</label>
+                        <div class="input-group glass rounded-3 overflow-hidden">
+                            <span class="input-group-text bg-transparent border-0 text-muted"><i class="bi bi-person"></i></span>
+                            <input type="text" class="form-control bg-transparent border-0 text-white p-2"
+                                [(ngModel)]="customerForm.customerName" name="customerName" required placeholder="Barney Stinson">
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-12">
+                        <label class="form-label ls-wide small opacity-75">Secure Email *</label>
+                        <div class="input-group glass rounded-3 overflow-hidden">
+                            <span class="input-group-text bg-transparent border-0 text-muted"><i class="bi bi-envelope"></i></span>
+                            <input type="email" class="form-control bg-transparent border-0 text-white p-2"
+                                [(ngModel)]="customerForm.email" name="email" required placeholder="corporate@gnb.com">
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-12">
+                        <label class="form-label ls-wide small opacity-75">Contact Number *</label>
+                        <div class="input-group glass rounded-3 overflow-hidden">
+                            <span class="input-group-text bg-transparent border-0 text-muted"><i class="bi bi-telephone"></i></span>
+                            <input type="text" class="form-control bg-transparent border-0 text-white p-2"
+                                [(ngModel)]="customerForm.contactNumber" name="contactNumber" required placeholder="+91 99999 99999">
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-12">
+                        <label class="form-label ls-wide small opacity-75">Customer Type *</label>
+                        <div class="input-group glass rounded-3 overflow-hidden">
+                            <span class="input-group-text bg-transparent border-0 text-muted"><i class="bi bi-tags"></i></span>
+                            <select class="form-select bg-transparent border-0 text-white p-2 shadow-none"
+                                [(ngModel)]="customerForm.customerType" name="customerType" required>
+                                <option *ngFor="let type of customerTypes" [value]="type">{{ type }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label ls-wide small opacity-75">Address *</label>
+                        <div class="input-group glass rounded-3 overflow-hidden">
+                            <span class="input-group-text bg-transparent border-0 text-muted"><i class="bi bi-geo-alt"></i></span>
+                            <input type="text" class="form-control bg-transparent border-0 text-white p-2"
+                                [(ngModel)]="customerForm.address" name="address" required placeholder="Sector 7G, Industrial Area">
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-12">
+                        <label class="form-label ls-wide small opacity-75">City *</label>
+                        <div class="input-group glass rounded-3 overflow-hidden">
+                            <span class="input-group-text bg-transparent border-0 text-muted"><i class="bi bi-map"></i></span>
+                            <input type="text" class="form-control bg-transparent border-0 text-white p-2"
+                                [(ngModel)]="customerForm.city" name="city" required placeholder="Metropolis">
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-12">
+                        <label class="form-label ls-wide small opacity-75">State *</label>
+                        <div class="input-group glass rounded-3 overflow-hidden">
+                            <span class="input-group-text bg-transparent border-0 text-muted"><i class="bi bi-globe"></i></span>
+                            <input type="text" class="form-control bg-transparent border-0 text-white p-2"
+                                [(ngModel)]="customerForm.state" name="state" required placeholder="Maharashtra">
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-12">
+                        <label class="form-label ls-wide small opacity-75">PIN Code *</label>
+                        <div class="input-group glass rounded-3 overflow-hidden">
+                            <span class="input-group-text bg-transparent border-0 text-muted"><i class="bi bi-pin-map"></i></span>
+                            <input type="text" class="form-control bg-transparent border-0 text-white p-2"
+                                [(ngModel)]="customerForm.pinCode" name="pinCode" required placeholder="400001">
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label ls-wide small opacity-75">GSTIN (Optional)</label>
+                        <div class="input-group glass rounded-3 overflow-hidden">
+                            <span class="input-group-text bg-transparent border-0 text-muted"><i class="bi bi-shield-check"></i></span>
+                            <input type="text" class="form-control bg-transparent border-0 text-white p-2"
+                                [(ngModel)]="customerForm.gstin" name="gstin" placeholder="22AAAAA0000A1Z5">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mt-3 gap-2">
+                    <button type="button" class="btn btn-premium-outline rounded-pill px-4 py-2" (click)="toggleForm()">CANCEL</button>
+                    <button type="submit" class="btn btn-premium shadow-emerald px-4 py-2 rounded-pill" [disabled]="!customerFormRef.form.valid">
+                        {{ isEditing ? 'SYNCHRONIZE NODE' : 'PROVISION ASSET' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Customer Registry Table — Immediately visible on page open -->
+        <div class="glass-card overflow-hidden animate-slide" style="animation-delay: 0.1s">
+            <div class="px-3 py-2 d-flex align-items-center justify-content-between border-bottom border-glass">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-people-fill text-emerald"></i>
+                    <span class="fw-bold text-white small">Authorized Stakeholder Registry</span>
+                    <span class="badge bg-emerald-soft text-emerald ms-1">{{ customers.length }}</span>
+                </div>
+                <div *ngIf="isLoading" class="spinner-border text-emerald spinner-border-sm"></div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-premium mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-3">IDENTITY</th>
+                            <th>CONTACT</th>
+                            <th class="d-none d-md-table-cell">LOCATION</th>
+                            <th class="d-none d-sm-table-cell">TYPE</th>
+                            <th class="d-none d-sm-table-cell">BALANCE</th>
+
+                            <th class="text-end pe-3">ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let customer of customers" class="animate-fade align-middle">
+                            <td class="ps-3 py-2">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-hub me-2" style="width:36px;height:36px;border-radius:10px;min-width:36px;">
+                                        <span class="text-emerald fw-bold">{{ customer.companyName.charAt(0).toUpperCase() }}</span>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark" style="font-size:0.87rem;line-height:1.2">{{ customer.companyName }}</div>
+                                        <small class="text-muted" style="font-size:0.71rem">{{ customer.customerName }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-2">
+                                <div class="text-dark" style="font-size:0.81rem"><i class="bi bi-envelope me-1 opacity-50"></i>{{ customer.email }}</div>
+                                <div class="text-muted" style="font-size:0.71rem"><i class="bi bi-telephone me-1 opacity-50"></i>{{ customer.contactNumber }}</div>
+                            </td>
+                            <td class="py-2 d-none d-md-table-cell">
+                                <div class="text-dark" style="font-size:0.81rem">{{ customer.city }}, {{ customer.state }}</div>
+                                <div class="text-muted" style="font-size:0.71rem">{{ customer.pinCode }}</div>
+                            </td>
+                            <td class="py-2 d-none d-sm-table-cell">
+                                <span class="badge rounded-pill bg-glass border border-emerald-soft text-emerald px-2 py-1" style="font-size:0.68rem">
+                                    {{ customer.customerType }}
+                                </span>
+                            </td>
+
+
+                            <td class="py-2 d-none d-sm-table-cell">
+                                <span class="badge rounded-pill bg-glass border border-emerald-soft text-emerald px-2 py-1" style="font-size:0.68rem">
+                                    {{ customer.customerType }}
+                                </span>
+                            </td>
+
+
+                            <td class="py-2 text-end pe-3">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <button class="btn-action-blue" style="width:30px;height:30px;border-radius:8px;font-size:0.8rem" (click)="onEdit(customer)" title="Edit">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
+                                    <button class="btn-action-rose" style="width:30px;height:30px;border-radius:8px;font-size:0.8rem" (click)="onDelete(customer.id)" title="Delete">
+                                        <i class="bi bi-trash3-fill"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr *ngIf="customers.length === 0 && !isLoading">
+                            <td colspan="5" class="text-center py-4 text-muted opacity-50">
+                                <i class="bi bi-people fs-2 d-block mb-2"></i>
+                                <span style="font-size:0.82rem">NO AUTHORIZED STAKEHOLDERS IN ARCHIVE</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

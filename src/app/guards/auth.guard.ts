@@ -19,10 +19,13 @@ export class AuthGuard implements CanActivate {
             // Check if route is restricted by role
             const expectedRole = route.data['expectedRole'];
 
-            if (expectedRole && user.role !== expectedRole && user.role !== 'ROLE_SUPER_ADMIN') {
-                // Role not authorized, redirect to home or user portal
-                this.toastService.error('Unauthorized Access: You do not have the required authority for this terminal.');
-                return this.router.parseUrl(user.role === 'ROLE_SUPER_ADMIN' ? '/super-admin' : '/user');
+            if (expectedRole) {
+                const roles = Array.isArray(expectedRole) ? expectedRole : [expectedRole];
+                if (!roles.includes(user.role) && user.role !== 'ROLE_SUPER_ADMIN') {
+                     // Role not authorized, redirect to home or user portal
+                    this.toastService.error('Unauthorized Access: You do not have the required authority for this terminal.');
+                    return this.router.parseUrl(user.role === 'ROLE_SUPER_ADMIN' ? '/super-admin' : '/home');
+                }
             }
 
             // Authorized, so return true

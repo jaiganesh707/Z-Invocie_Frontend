@@ -1,0 +1,156 @@
+<div class="dashboard-viewport animate-fade">
+    <header class="mb-5 pb-4 border-bottom border-glass animate-slide">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="display-6 fw-bold text-white mb-1 ls-tight tracking-tight">Strategic Operations</h2>
+                <div class="d-flex align-items-center">
+                    <div class="status-dot pulse-emerald me-2"></div>
+                    <p class="text-emerald small mb-0 fw-bold opacity-75">GOVERNING PRIME NODE: <span
+                            class="text-white">{{ user?.username }}</span></p>
+                </div>
+            </div>
+            <div class="d-none d-md-block">
+                <div class="badge-premium shadow-emerald">
+                    <i class="bi bi-shield-check me-2"></i> PRIME PROTOCOL ACTIVE
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Stat Grid -->
+    <div class="row g-4 mb-5 animate-slide" style="animation-delay: 0.1s">
+        <div class="col-md-3">
+            <div class="stat-card shadow-emerald h-100">
+                <div class="stat-icon-bg bg-primary bg-opacity-10 mb-3">
+                    <i class="bi bi-currency-rupee text-primary"></i>
+                </div>
+                <div class="stat-label">TOTAL INVOICED</div>
+                <div class="stat-value display-6">₹4,82,500</div>
+                <div class="stat-trend text-primary-bright">
+                    <i class="bi bi-arrow-up me-1"></i> 12.5% vs last month
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card shadow-emerald h-100 border-success border-opacity-25">
+                <div class="stat-icon-bg bg-success bg-opacity-10 mb-3">
+                    <i class="bi bi-wallet2 text-success"></i>
+                </div>
+                <div class="stat-label">REALIZED VALUE</div>
+                <div class="stat-value display-6 text-success">₹3,15,000</div>
+                <div class="stat-trend text-success-bright">
+                    <i class="bi bi-patch-check me-1"></i> 65.3% Clearance
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card shadow-emerald h-100 border-warning border-opacity-25">
+                <div class="stat-icon-bg bg-warning bg-opacity-10 mb-3">
+                    <i class="bi bi-clock-history text-warning"></i>
+                </div>
+                <div class="stat-label">PENDING LIQUIDITY</div>
+                <div class="stat-value display-6 text-warning">₹1,24,500</div>
+                <div class="stat-trend text-muted small">8 Pending Invoices</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card shadow-emerald h-100 border-danger border-opacity-25">
+                <div class="stat-icon-bg bg-danger bg-opacity-10 mb-3">
+                    <i class="bi bi-exclamation-triangle text-danger"></i>
+                </div>
+                <div class="stat-label">OVERDUE ASSETS</div>
+                <div class="stat-value display-6 text-danger">₹43,000</div>
+                <div class="stat-trend text-danger small">Risk Level: Moderate</div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <!-- Activity Matrices -->
+    <div class="row g-4 animate-slide" style="animation-delay: 0.2s">
+        <div class="col-lg-8">
+            <div class="glass-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="text-white fw-bold mb-0">Recent Transaction Ledger</h5>
+                    <a [routerLink]="['/stakeholder', user?.id]"
+                        class="btn btn-sm glass border-glass text-emerald rounded-pill px-3">
+                        DISPATCH HUB <i class="bi bi-arrow-right-short"></i>
+                    </a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover mb-0">
+                        <thead>
+                            <tr class="text-muted opacity-75 small ls-wide bg-glass">
+                                <th class="ps-3">INVOICE IDENTITY</th>
+                                <th>STAKEHOLDER</th>
+                                <th class="text-end pe-3">NET VALUE</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-glass align-middle">
+                                <td class="ps-3 py-3">
+                                    <span class="text-white fw-bold">#INV-1041</span>
+                                    <div class="text-muted small">Mar 16, 10:42 AM</div>
+                                </td>
+                                <td>Nexus Corp</td>
+                                <td class="text-end pe-3">
+                                    <div class="text-emerald fw-bold">₹48,000</div>
+                                </td>
+                            </tr>
+                            <tr class="border-glass align-middle">
+                                <td class="ps-3 py-3">
+                                    <span class="text-white fw-bold">#INV-1040</span>
+                                    <div class="text-muted small">Mar 15, 4:15 PM</div>
+                                </td>
+                                <td>BlueTech Devices</td>
+                                <td class="text-end pe-3">
+                                    <div class="text-emerald fw-bold">₹32,000</div>
+                                </td>
+                            </tr>
+                            <tr class="border-glass align-middle">
+                                <td class="ps-3 py-3">
+                                    <span class="text-white fw-bold">#INV-1039</span>
+                                    <div class="text-muted small">Mar 12, 11:30 AM</div>
+                                </td>
+                                <td>Synapse Logic</td>
+                                <td class="text-end pe-3">
+                                    <div class="text-emerald fw-bold">₹1,12,000</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="glass-card p-4 h-100">
+                <h5 class="text-white fw-bold mb-4">Activity Timeline</h5>
+                <div class="timeline-vault">
+                    <div class="timeline-node">
+                        <div class="node-bullet bg-primary"></div>
+                        <div class="node-content">
+                            <p class="text-white mb-0 small fw-bold">₹48,000 Received</p>
+                            <small class="text-muted d-block">Nexus Corp • UPI Verified</small>
+                            <span class="badge bg-glass text-emerald mt-1" style="font-size: 0.6rem;">SUCCESS</span>
+                        </div>
+                    </div>
+                    <div class="timeline-node">
+                        <div class="node-bullet bg-warning"></div>
+                        <div class="node-content">
+                            <p class="text-white mb-0 small fw-bold">Partial Settlement</p>
+                            <small class="text-muted d-block">BlueTech • ₹18,100 Credit</small>
+                        </div>
+                    </div>
+                    <div class="timeline-node border-0">
+                        <div class="node-bullet bg-primary"></div>
+                        <div class="node-content">
+                            <p class="text-white mb-0 small fw-bold">Ledger Updated</p>
+                            <small class="text-muted d-block">Synapse Logic Settlement</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

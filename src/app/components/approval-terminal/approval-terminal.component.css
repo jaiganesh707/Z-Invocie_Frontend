@@ -1,0 +1,220 @@
+:host {
+    --glass-bg: rgba(15, 23, 42, 0.7);
+    --glass-dark: rgba(2, 6, 17, 0.8);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --blue-primary: #3b82f6;
+    --emerald-primary: #10b981;
+    --rose-primary: #f43f5e;
+    --premium-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+.animate-fade {
+    animation: fadeIn 0.4s ease-out;
+}
+
+.animate-slide {
+    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.bg-glass-dark {
+    background: var(--glass-dark);
+    backdrop-filter: blur(20px);
+}
+
+.border-glass {
+    border-color: var(--glass-border) !important;
+}
+
+.bg-premium {
+    background: var(--premium-gradient);
+}
+
+.glass-container {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.pulse-emerald {
+    background: var(--emerald-primary);
+    box-shadow: 0 0 0 rgba(16, 185, 129, 0.4);
+    animation: pulseEmerald 2s infinite;
+}
+
+@keyframes pulseEmerald {
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+.queue-list {
+    max-height: 600px;
+}
+
+.scroll-custom::-webkit-scrollbar {
+    width: 5px;
+}
+
+.scroll-custom::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scroll-custom::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.queue-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.queue-item:hover {
+    background: rgba(255, 255, 255, 0.07);
+    transform: translateX(5px);
+}
+
+.queue-item.active {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+    box-shadow: inset 0 0 15px rgba(59, 130, 246, 0.1);
+}
+
+.bg-glass-blue {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--blue-primary);
+}
+
+.text-emerald {
+    color: var(--emerald-primary) !important;
+}
+
+.text-rose {
+    color: var(--rose-primary) !important;
+}
+
+.border-rose {
+    border-color: var(--rose-primary) !important;
+}
+
+.btn-rose {
+    background: var(--rose-primary);
+    color: white;
+    border: none;
+}
+
+.btn-premium-emerald {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border: none;
+    color: white;
+    box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn-premium-rose {
+    background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+    border: none;
+    color: white;
+    box-shadow: 0 10px 15px -3px rgba(244, 63, 94, 0.3);
+    transition: all 0.3s ease;
+}
+
+.shadow-emerald {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+}
+
+.shadow-amber {
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+}
+
+.btn-premium-emerald:hover,
+.btn-premium-rose:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+.table-dark {
+    --bs-table-bg: transparent;
+}
+
+.border-glass-soft {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.ls-wide {
+    letter-spacing: 0.1em;
+}
+
+.uppercase {
+    text-transform: uppercase;
+}
+
+.smaller {
+    font-size: 0.7rem;
+}
+
+.min-vh-60 {
+    min-height: 60vh;
+}
+
+.bg-emerald-soft {
+    background: rgba(16, 185, 129, 0.1) !important;
+    color: #34d399 !important;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.bg-amber-soft {
+    background: rgba(245, 158, 11, 0.1) !important;
+    color: #fbbf24 !important;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.transition-all {
+    transition: all 0.3s ease;
+}
+
+.nav-link.active {
+    background: var(--blue-primary) !important;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}

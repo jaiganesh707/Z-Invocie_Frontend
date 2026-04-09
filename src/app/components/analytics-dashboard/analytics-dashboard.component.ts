@@ -81,7 +81,7 @@ export class AnalyticsDashboardComponent implements OnInit {
                 display: true,
                 position: 'top',
                 labels: {
-                    color: '#94a3b8',
+                    color: '#e2e8f0',
                     font: { family: 'Outfit', size: 14, weight: 'bold' },
                     usePointStyle: true,
                     padding: 20
@@ -102,11 +102,11 @@ export class AnalyticsDashboardComponent implements OnInit {
         },
         scales: {
             y: {
-                ticks: { color: '#64748b', font: { family: 'Outfit' } },
-                grid: { color: 'rgba(255,255,255,0.03)', drawTicks: false }
+                ticks: { color: '#94a3b8', font: { family: 'Outfit' } },
+                grid: { color: 'rgba(255,255,255,0.05)', drawTicks: false }
             },
             x: {
-                ticks: { color: '#94a3b8', font: { family: 'Outfit', weight: 'bold' } },
+                ticks: { color: '#cbd5e1', font: { family: 'Outfit', weight: 'bold' } },
                 grid: { display: false }
             }
         },
@@ -134,18 +134,26 @@ export class AnalyticsDashboardComponent implements OnInit {
             .subscribe(() => this.fetchPerformance(false));
     }
 
+    setPeriod(p: string) {
+        if (this.period() === p) return;
+        this.period.set(p);
+        this.fetchPerformance(true);
+    }
+
     ngOnDestroy(): void {
         this.destroy$.next();
         this.destroy$.complete();
     }
 
     fetchPerformance(showLoading = true) {
+
         // Only show full loading if we don't have existing data in the component
-        if (showLoading && this.performanceData.length === 0) {
+        if (showLoading && (this.performanceData.length === 0 || this.period())) {
             this.isLoading = true;
         }
 
-        this.analyticsService.getStakeholderPerformance()
+
+        this.analyticsService.getStakeholderPerformance(this.period())
             .pipe(takeUntil(this.destroy$))
             .subscribe({
                 next: (data) => {
@@ -156,7 +164,7 @@ export class AnalyticsDashboardComponent implements OnInit {
                     this.cdr.detectChanges();
 
                     if (isNewData && !showLoading) {
-                        this.toastService.show('Performance data synchronized automatically', 'success');
+                        this.toastService.show(`Performance data synchronized for ${this.period()}`, 'success');
                     }
                 },
                 error: (err) => {

@@ -16,12 +16,15 @@ import { ToastComponent } from './components/toast/toast.component';
     styleUrl: './app.component.css'
 })
 export class AppComponent implements OnInit {
-    private role: string | null = null;
+    role: string | null = null;
     isLoggedIn = false;
     showSuperAdminBoard = false;
     isSidebarActive = false;
+    isSidebarCollapsed = false;
     username?: string;
     userId?: number;
+    parentUserId?: number;
+    isLead = false;
     private authSubscription?: Subscription;
 
     constructor(
@@ -37,14 +40,18 @@ export class AppComponent implements OnInit {
 
             if (user) {
                 this.role = user.role;
+                this.isLead = this.role ? this.role.includes('_LEAD') : false;
                 this.showSuperAdminBoard = this.role === 'ROLE_SUPER_ADMIN';
                 this.username = user.username;
                 this.userId = user.id;
+                this.parentUserId = user.parentUserId ?? user.id;
             } else {
                 this.role = null;
+                this.isLead = false;
                 this.showSuperAdminBoard = false;
                 this.username = undefined;
                 this.userId = undefined;
+                this.parentUserId = undefined;
             }
         });
     }
@@ -60,6 +67,11 @@ export class AppComponent implements OnInit {
         this.authService.clearCurrentUser();
         this.router.navigate(['/home']);
     }
+
+    toggleSidebar(): void {
+        this.isSidebarCollapsed = !this.isSidebarCollapsed;
+    }
+
 
     refreshAuthority(): void {
         // Force a data refresh in the background if already on the admin page

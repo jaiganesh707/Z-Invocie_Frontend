@@ -26,6 +26,10 @@ export class AuthService {
         this.currentUserSubject.next(user);
     }
 
+    getCurrentUser(): any {
+        return this.currentUserSubject.value;
+    }
+
     clearCurrentUser(): void {
         this.currentUserSubject.next(null);
     }

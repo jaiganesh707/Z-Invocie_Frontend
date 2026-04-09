@@ -1,77 +1,260 @@
-<div class="app-wrapper">
-    <!-- Mobile Toggle -->
-    <button class="btn btn-emerald glass mobile-toggle d-lg-none" (click)="isSidebarActive = !isSidebarActive">
-        <i class="bi" [class.bi-list]="!isSidebarActive" [class.bi-x-lg]="isSidebarActive"></i>
-    </button>
+<ng-container *ngIf="role !== 'ROLE_DRIVER'; else independentLayout">
+    <div class="app-wrapper">
+        <!-- Mobile Toggle -->
+        <button class="btn btn-emerald text-white glass mobile-toggle d-lg-none no-print"
+            (click)="isSidebarActive = !isSidebarActive">
+            <i class="bi" [class.bi-list]="!isSidebarActive" [class.bi-x-lg]="isSidebarActive"></i>
+        </button>
 
-    <!-- Sidebar Backdrop for Mobile -->
-    <div class="sidebar-overlay d-lg-none" [class.active]="isSidebarActive" (click)="isSidebarActive = false"></div>
+        <!-- Sidebar Backdrop for Mobile -->
+        <div class="sidebar-overlay d-lg-none" [class.active]="isSidebarActive" (click)="isSidebarActive = false"></div>
 
-    <!-- Permanent Sidebar -->
-    <aside class="sidebar" [class.active]="isSidebarActive">
-        <div class="sidebar-header mb-5 text-center">
-            <a class="d-block text-decoration-none" routerLink="/home">
-                <i class="bi bi-bank2 text-emerald fs-1 mb-2"></i>
-                <h3 class="fs-4 mb-0">Z-FINANCE</h3>
-            </a>
-        </div>
-
-        <nav class="flex-grow-1">
-            <a class="nav-sidebar-link" routerLink="/home" routerLinkActive="active" (click)="isSidebarActive = false">
-                <i class="bi bi-speedometer2"></i> Global Market
-            </a>
-
-
-
-            <a class="nav-sidebar-link" *ngIf="showSuperAdminBoard" routerLink="/analytics" routerLinkActive="active"
-                (click)="isSidebarActive = false">
-                <i class="bi bi-graph-up-arrow"></i> Analytics
-            </a>
-
-            <a class="nav-sidebar-link" *ngIf="isLoggedIn && !showSuperAdminBoard"
-                [routerLink]="['/user-billing', userId]" routerLinkActive="active" (click)="isSidebarActive = false">
-                <i class="bi bi-receipt"></i> Billing
-            </a>
-
-            <a class="nav-sidebar-link" *ngIf="showSuperAdminBoard" routerLink="/super-admin" routerLinkActive="active"
-                (click)="refreshAuthority(); isSidebarActive = false">
-                <i class="bi bi-shield-lock"></i> Authority
-            </a>
-
-            <a class="nav-sidebar-link" *ngIf="isLoggedIn" routerLink="/profile" routerLinkActive="active"
-                (click)="isSidebarActive = false">
-                <i class="bi bi-person-circle"></i> Identity
-            </a>
-
-            <hr class="border-glass my-4">
-
-            <div class="auth-section" *ngIf="!isLoggedIn">
-                <a class="btn-premium w-100 d-block text-center mt-3" routerLink="/login">
-                    <i class="bi bi-box-arrow-in-right me-2"></i> Private Login
+        <!-- Permanent Sidebar -->
+        <aside class="sidebar no-print" [class.active]="isSidebarActive" [class.collapsed]="isSidebarCollapsed">
+            <div class="sidebar-header mb-5 d-flex align-items-center justify-content-between px-2">
+                <a class="d-flex align-items-center text-decoration-none" routerLink="/home"
+                    *ngIf="!isSidebarCollapsed">
+                    <i class="bi bi-bank2 text-emerald fs-4 me-2"></i>
+                    <h3 class="fs-5 mb-0 fw-black ls-tight">Z-FINANCE</h3>
                 </a>
-            </div>
+                <i class="bi bi-bank2 text-emerald fs-3 mx-auto" *ngIf="isSidebarCollapsed" routerLink="/home"></i>
 
-            <div class="auth-section" *ngIf="isLoggedIn">
-                <button class="btn btn-premium-outline w-100 text-danger" (click)="logout()">
-                    <i class="bi bi-power me-2"></i> Termination
+                <button class="btn btn-sm btn-link text-white-50 p-2 d-none d-lg-block" (click)="toggleSidebar()"
+                    style="border: none; box-shadow: none;">
+                    <i class="bi" [class.bi-chevron-left]="!isSidebarCollapsed"
+                        [class.bi-chevron-right]="isSidebarCollapsed"></i>
                 </button>
             </div>
-        </nav>
 
-        <!-- Sidebar Widgets -->
-        <div class="sidebar-footer mt-auto">
-            <div class="text-center mt-4 smaller text-muted opacity-50">
-                &copy; 2026 Z-FINANCE SECURED
+
+            <nav class="flex-grow-1">
+                <a class="nav-sidebar-link" routerLink="/home" routerLinkActive="active"
+                    (click)="isSidebarActive = false" [title]="isSidebarCollapsed ? 'Global Market' : ''">
+                    <i class="bi bi-globe"></i> <span class="link-label">Global Market</span>
+                </a>
+
+                <!-- Dashboard for Prime/Approver/Management -->
+                <a class="nav-sidebar-link"
+                    *ngIf="isLoggedIn && (role === 'ROLE_PRIME_USER' || role === 'ROLE_APPROVER' || role === 'ROLE_MANAGEMENT' || role === 'ROLE_SUPERVISOR')"
+                    routerLink="/prime-dashboard" routerLinkActive="active" (click)="isSidebarActive = false"
+                    [title]="isSidebarCollapsed ? 'Dashboard' : ''">
+                    <i class="bi bi-grid-1x2"></i> <span class="link-label">Dashboard</span>
+                </a>
+
+                <!-- Dashboard for Workflow Users (Invoice Creators) -->
+                <a class="nav-sidebar-link" *ngIf="isLoggedIn && role === 'ROLE_WORKFLOW_USER'"
+                    routerLink="/workflow-dashboard" routerLinkActive="active" (click)="isSidebarActive = false"
+                    [title]="isSidebarCollapsed ? 'My Dashboard' : ''">
+                    <i class="bi bi-speedometer2"></i> <span class="link-label">My Dashboard</span>
+                </a>
+
+                <a class="nav-sidebar-link" *ngIf="showSuperAdminBoard" routerLink="/analytics"
+                    routerLinkActive="active" (click)="isSidebarActive = false"
+                    [title]="isSidebarCollapsed ? 'Analytics' : ''">
+                    <i class="bi bi-graph-up-arrow"></i> <span class="link-label">Analytics</span>
+                </a>
+
+                <a class="nav-sidebar-link" *ngIf="isLoggedIn && role === 'ROLE_PRIME_USER'" routerLink="/products"
+                    routerLinkActive="active" (click)="isSidebarActive = false"
+                    [title]="isSidebarCollapsed ? 'Products' : ''">
+                    <i class="bi bi-box-seam"></i> <span class="link-label">Products</span>
+                </a>
+
+                <!-- Customers for Prime Users -->
+                <a class="nav-sidebar-link" *ngIf="isLoggedIn && role === 'ROLE_PRIME_USER'" routerLink="/customers"
+                    routerLinkActive="active" (click)="isSidebarActive = false"
+                    [title]="isSidebarCollapsed ? 'Customers' : ''">
+                    <i class="bi bi-people"></i> <span class="link-label">Customers</span>
+                </a>
+
+                <!-- Workflow Management for Prime Users -->
+                <a class="nav-sidebar-link" *ngIf="isLoggedIn && role === 'ROLE_PRIME_USER'" routerLink="/workflow"
+                    routerLinkActive="active" (click)="isSidebarActive = false"
+                    [title]="isSidebarCollapsed ? 'Workflow Center' : ''">
+                    <i class="bi bi-diagram-3"></i> <span class="link-label">Workflow Center</span>
+                </a>
+
+
+                <!-- Invoices for Prime/Management -->
+                <a class="nav-sidebar-link"
+                    *ngIf="isLoggedIn && (role === 'ROLE_PRIME_USER' || role === 'ROLE_MANAGEMENT')"
+                    routerLink="/invoices" routerLinkActive="active" (click)="isSidebarActive = false"
+                    [title]="isSidebarCollapsed ? 'Invoices' : ''">
+                    <i class="bi bi-collection"></i> <span class="link-label">Invoices</span>
+                </a>
+
+                <!-- My Invoices for Workflow Users — goes to their personal dashboard -->
+                <a class="nav-sidebar-link" *ngIf="isLoggedIn && role === 'ROLE_WORKFLOW_USER'" routerLink="/invoices"
+                    routerLinkActive="active" (click)="isSidebarActive = false"
+                    [title]="isSidebarCollapsed ? 'My Invoices' : ''">
+                    <i class="bi bi-collection"></i> <span class="link-label">My Invoices</span>
+                </a>
+
+                <!-- Products Feature for Workflow Users (Browse) -->
+                <a class="nav-sidebar-link" *ngIf="isLoggedIn && role === 'ROLE_WORKFLOW_USER'" routerLink="/products"
+                    routerLinkActive="active" (click)="isSidebarActive = false"
+                    [title]="isSidebarCollapsed ? 'Browse Products' : ''">
+                    <i class="bi bi-box-seam"></i> <span class="link-label">Browse Products</span>
+                </a>
+
+                <!-- Invoice Creator for Prime User -->
+                <a class="nav-sidebar-link text-emerald" *ngIf="isLoggedIn && role === 'ROLE_PRIME_USER'"
+                    routerLink="/create-invoice" routerLinkActive="active" (click)="isSidebarActive = false"
+                    [title]="isSidebarCollapsed ? 'Create Invoice' : ''">
+                    <i class="bi bi-plus-circle-fill"></i> <span class="link-label">Create Invoice</span>
+                </a>
+
+                <!-- Invoice Creator for Workflow Users -->
+                <a class="nav-sidebar-link text-emerald" *ngIf="isLoggedIn && role === 'ROLE_WORKFLOW_USER'"
+                    routerLink="/create-invoice" routerLinkActive="active" (click)="isSidebarActive = false"
+                    [title]="isSidebarCollapsed ? 'Create Invoice' : ''">
+                    <i class="bi bi-plus-circle-fill"></i> <span class="link-label">Create Invoice</span>
+                </a>
+
+                <!-- Tax Management for Prime Users -->
+                <a class="nav-sidebar-link" *ngIf="isLoggedIn && role === 'ROLE_PRIME_USER'" routerLink="/taxes"
+                    routerLinkActive="active" (click)="isSidebarActive = false"
+                    [title]="isSidebarCollapsed ? 'Tax Protocols' : ''">
+                    <i class="bi bi-shield-check"></i> <span class="link-label">Tax Protocols</span>
+                </a>
+
+                <!-- Lead Hub (Driver Head, Marketing Head, etc.) -->
+                <ng-container *ngIf="isLoggedIn && isLead">
+                    <div
+                        class="sidebar-label px-3 mt-4 mb-2 small text-uppercase text-emerald opacity-50 fw-900 ls-wide">
+                        Lead Head Management</div>
+                    <a class="nav-sidebar-link" routerLink="/hr-hub" routerLinkActive="active"
+                        (click)="isSidebarActive = false" [title]="isSidebarCollapsed ? 'Dashboard' : ''">
+                        <i class="bi bi-speedometer2 text-emerald"></i> <span class="link-label">Dashboard</span>
+                    </a>
+                    <a class="nav-sidebar-link" routerLink="/hr-hub" routerLinkActive="active"
+                        (click)="isSidebarActive = false" [title]="isSidebarCollapsed ? 'Employees List' : ''">
+                        <i class="bi bi-person-lines-fill text-emerald"></i> <span class="link-label">Employees
+                            List</span>
+                    </a>
+                </ng-container>
+
+                <!-- HR Specialist Hub -->
+                <ng-container *ngIf="isLoggedIn && role === 'ROLE_HR'">
+                    <div
+                        class="sidebar-label px-3 mt-4 mb-2 small text-uppercase text-emerald opacity-50 fw-900 ls-wide">
+                        HR INTELLIGENCE</div>
+                    <a class="nav-sidebar-link" routerLink="/hr-hub" routerLinkActive="active"
+                        (click)="isSidebarActive = false" [title]="isSidebarCollapsed ? 'Personnel Nodes' : ''">
+                        <i class="bi bi-people-fill text-emerald"></i> <span class="link-label">Personnel Nodes</span>
+                    </a>
+                    <a class="nav-sidebar-link" routerLink="/chef-employees" routerLinkActive="active"
+                        (click)="isSidebarActive = false" [title]="isSidebarCollapsed ? 'Chef Employees' : ''">
+                        <i class="bi bi-person-badge-fill text-emerald"></i> <span class="link-label">Chef
+                            Employees</span>
+                    </a>
+                </ng-container>
+
+                <!-- Invoices for Approvers -->
+                <a class="nav-sidebar-link"
+                    *ngIf="isLoggedIn && (role === 'ROLE_APPROVER' || role === 'ROLE_PRIME_USER' || role === 'ROLE_MANAGEMENT' || role === 'ROLE_SUPERVISOR')"
+                    routerLink="/approval" routerLinkActive="active" (click)="isSidebarActive = false"
+                    [title]="isSidebarCollapsed ? 'Pending Checks' : ''">
+                    <i class="bi bi-check2-square"></i>
+                    <span class="link-label d-flex align-items-center justify-content-between w-100">
+                        Pending Checks
+                        <span class="status-dot pulse-emerald ms-2" *ngIf="role === 'ROLE_APPROVER'"></span>
+                    </span>
+                </a>
+
+                <!-- Maintenance & Marketing Specialized Links -->
+                <a class="nav-sidebar-link" *ngIf="isLoggedIn && (role === 'ROLE_MAINTENANCE')" routerLink="/home"
+                    routerLinkActive="active" (click)="isSidebarActive = false"
+                    [title]="isSidebarCollapsed ? 'Maintenance Control' : ''">
+                    <i class="bi bi-tools"></i> <span class="link-label">Maintenance Control</span>
+                </a>
+                <a class="nav-sidebar-link" *ngIf="isLoggedIn && (role === 'ROLE_MARKETING')" routerLink="/home"
+                    routerLinkActive="active" (click)="isSidebarActive = false"
+                    [title]="isSidebarCollapsed ? 'Marketing Intel' : ''">
+                    <i class="bi bi-megaphone"></i> <span class="link-label">Marketing Intel</span>
+                </a>
+
+                <!-- Billing Terminal for Workflow Users: REMOVED - employees do not use billing terminal -->
+
+
+
+                <!-- Billing Terminal for Non-SuperAdmins -->
+                <a class="nav-sidebar-link" *ngIf="isLoggedIn && (role === 'ROLE_USER')"
+                    [routerLink]="['/user-billing', parentUserId]" routerLinkActive="active"
+                    (click)="isSidebarActive = false" [title]="isSidebarCollapsed ? 'Billing Terminal' : ''">
+                    <i class="bi bi-receipt"></i> <span class="link-label">Billing Terminal</span>
+                </a>
+
+                <a class="nav-sidebar-link" *ngIf="showSuperAdminBoard" routerLink="/super-admin"
+                    routerLinkActive="active" (click)="refreshAuthority(); isSidebarActive = false"
+                    [title]="isSidebarCollapsed ? 'Authority' : ''">
+                    <i class="bi bi-shield-lock"></i> <span class="link-label">Authority</span>
+                </a>
+
+                <a class="nav-sidebar-link" *ngIf="isLoggedIn" routerLink="/profile" routerLinkActive="active"
+                    (click)="isSidebarActive = false" [title]="isSidebarCollapsed ? 'Identity' : ''">
+                    <i class="bi bi-person-circle"></i> <span class="link-label">Identity</span>
+                </a>
+
+                <hr class="border-glass my-4">
+
+                <div class="auth-section" *ngIf="!isLoggedIn">
+                    <a class="btn-premium w-100 d-block text-center mt-3" routerLink="/login">
+                        <i class="bi bi-box-arrow-in-right me-2"></i> Private Login
+                    </a>
+                </div>
+            </nav>
+
+            <!-- Sidebar Widgets -->
+            <div class="sidebar-footer mt-auto">
+                <div class="text-center mt-4 text-white opacity-50">
+                    &copy; 2026 Z-FINANCE SECURED
+                </div>
             </div>
-        </div>
-    </aside>
+        </aside>
 
-    <!-- Main Workspace -->
-    <main class="main-content">
-        <div class="container-fluid py-4 animate-fade">
-            <router-outlet></router-outlet>
-        </div>
-    </main>
-</div>
+        <!-- Main Workspace -->
+        <main class="main-content" [class.expanded]="isSidebarCollapsed">
+            <!-- Top Header: User Profile & Quick Actions -->
+            <header class="top-header glass mb-4 no-print" *ngIf="isLoggedIn">
+                <div class="user-quick-profile">
+                    <!-- User Avatar (Initial) -->
+                    <div class="user-avatar-circle">
+                        {{ username?.substring(0,1)?.toUpperCase() }}
+                    </div>
+
+                    <!-- Identital Metadata -->
+                    <div class="user-meta">
+                        <span class="name">{{ username }}</span>
+                        <span class="role-badge">{{ role?.replace('ROLE_', '')?.replace('_', ' ') }}</span>
+                    </div>
+
+                    <!-- Quick Actions Divider -->
+                    <div class="header-actions">
+                        <div class="logout-trigger shadow-sm" (click)="logout()" title="Secure Logout">
+                            <i class="bi bi-box-arrow-right fs-5"></i>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="row mb-3 justify-content-center" *ngIf="isLead">
+                <div class="col-auto text-center">
+                    <div
+                        class="badge bg-emerald-soft text-emerald px-4 py-2 rounded-pill fw-900 ls-widest shadow-sm border border-emerald-soft">
+                        {{ role?.replace('ROLE_', '')?.replace('_', ' ') }}
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid py-4 animate-fade">
+                <router-outlet></router-outlet>
+            </div>
+        </main>
+    </div>
+</ng-container>
+
+<ng-template #independentLayout>
+    <router-outlet></router-outlet>
+</ng-template>
 
 <app-toast></app-toast>

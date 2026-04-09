@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpEvent, HttpInterceptor, HttpHandler, HttpRequest, HTTP_INTERCEPTORS, HttpErrorResponse } from '@angular/common/http';
 import { catchError, Observable, throwError } from 'rxjs';
+import { ToastService } from '../services/toast.service';
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
-    constructor() { }
+    constructor(private toastService: ToastService) { }
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         return next.handle(req).pipe(
@@ -18,11 +19,11 @@ export class ErrorInterceptor implements HttpInterceptor {
                     errorMessage = error.error.message;
                 } else {
                     // Server-side error (default generic)
-                    errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
+                    errorMessage = `Transaction error [Code ${error.status}]: ${error.statusText}`;
                 }
 
-                // You could use a snackbar or toast service here
-                console.error(errorMessage);
+                this.toastService.error(errorMessage);
+                console.error('Interception Error:', errorMessage);
                 return throwError(() => error);
             })
         );

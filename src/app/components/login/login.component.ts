@@ -52,8 +52,34 @@ export class LoginComponent implements OnInit {
                 this.authService.setCurrentUser(data);
                 this.toastService.success('Login successful! Welcome back.');
 
-                // User requested to always land on Global Market first
-                this.router.navigate(['/home']);
+                // Route every role directly to their dashboard
+                switch (data.role) {
+                    case 'ROLE_PRIME_USER':
+                        this.router.navigate(['/prime-dashboard']);
+                        break;
+                    case 'ROLE_SUPER_ADMIN':
+                        this.router.navigate(['/super-admin']);
+                        break;
+                    case 'ROLE_APPROVER':
+                        this.router.navigate(['/prime-dashboard']);
+                        break;
+                    case 'ROLE_HR':
+                        this.router.navigate(['/hr-hub']);
+                        break;
+                    case 'ROLE_WORKFLOW_USER':
+                        this.router.navigate(['/workflow-dashboard']);
+                        break;
+                    case 'ROLE_MANAGEMENT':
+                    case 'ROLE_SUPERVISOR':
+                        this.router.navigate(['/prime-dashboard']);
+                        break;
+                    case 'ROLE_DRIVER':
+                        this.router.navigate(['/driver-dashboard']);
+                        break;
+                    default:
+                        this.router.navigate(['/user-billing', data.id]);
+                        break;
+                }
             },
             error: err => {
                 this.isLoginFailed = true;

@@ -1,0 +1,138 @@
+<div class="container-fluid py-5">
+    <div class="row align-items-center mb-5">
+        <div class="col">
+            <h2 class="display-5 fw-bold text-white mb-2 ls-tight">Tax Infrastructure</h2>
+            <p class="text-emerald lead mb-0">Define and calibrate taxation protocols for your global node operations.
+            </p>
+        </div>
+    </div>
+
+    <!-- Summary Box & Action Trigger -->
+    <div class="row g-4 mb-5 animate-slide">
+        <div class="col-md-6">
+            <div class="glass-card p-4 border-emerald-soft bg-emerald-soft h-100 position-relative overflow-hidden">
+                <div class="d-flex justify-content-between align-items-center position-relative z-1">
+                    <div>
+                        <div class="stat-label text-emerald small fw-bold text-uppercase ls-wide mb-1">Active Protocols
+                        </div>
+                        <h3 class="text-white fw-black mb-0">{{ taxes().length }} Configured Rules</h3>
+                    </div>
+                    <div class="icon-orb bg-emerald p-4 shadow-emerald" (click)="toggleForm()"
+                        style="cursor: pointer; transition: transform 0.3s ease;"
+                        onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                        <i class="bi bi-plus-lg text-white fs-3"></i>
+                    </div>
+                </div>
+                <div class="position-absolute" style="right: -20px; bottom: -20px; opacity: 0.05;">
+                    <i class="bi bi-shield-check display-1 text-white"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="glass-card p-4 h-100 d-flex align-items-center">
+                <i class="bi bi-info-circle text-emerald me-3 fs-3"></i>
+                <p class="text-white mb-0 small ls-tight">These protocols are automatically injected into the **Billing
+                    Terminal** and applied to all generated financial statements.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Initialization Form -->
+    <div *ngIf="isFormVisible()" class="glass-card p-4 mb-5 transform-gpu transition-all shadow-premium animate-slide">
+        <h4 class="text-white mb-4 fw-bold ls-tight">
+            {{ isEditing() ? 'Recalibrate Protocol' : 'Initialize New Tax Rule' }}
+        </h4>
+        <form (ngSubmit)="onSubmit()" class="row g-4">
+            <div class="col-md-4">
+                <label class="form-label text-white small fw-bold text-uppercase ls-wide">Name</label>
+                <input type="text" class="form-control input-field" [(ngModel)]="taxForm.name" name="name"
+                    placeholder="GST, VAT, Service Tax..." required>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label text-white small fw-bold text-uppercase ls-wide">Percentage (%)</label>
+                <input type="number" class="form-control input-field" [(ngModel)]="taxForm.percentage" name="percentage"
+                    required min="0" max="100">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label text-white small fw-bold text-uppercase ls-wide">Description (Dec)</label>
+                <input type="text" class="form-control input-field" [(ngModel)]="taxForm.description" name="description"
+                    placeholder="Short protocol brief...">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" [(ngModel)]="taxForm.isActive" name="isActive">
+                    <label class="form-check-label text-white small">Active Status</label>
+                </div>
+            </div>
+            <div class="col-12 text-end">
+                <button type="submit" class="btn btn-outline-light px-5 rounded-pill fw-bold text-black">
+                    {{ isEditing() ? 'Commit Changes' : 'Initialize Rule' }}
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Protocol Registry (List Format) -->
+    <div class="glass-card overflow-hidden">
+        <div class="p-4 border-bottom border-glass bg-glass-dark">
+            <h5 class="text-white fw-bold mb-0 ls-tight">Tax Protocol Registry</h5>
+        </div>
+
+        <div *ngIf="isLoading()" class="text-center py-5">
+            <div class="spinner-border text-emerald" role="status"></div>
+            <p class="text-white mt-3 fw-medium">Synchronizing with central ledger...</p>
+        </div>
+
+        <div *ngIf="!isLoading() && taxes().length === 0" class="p-5 text-center">
+            <i class="bi bi-shield-slash display-1 text-muted opacity-25"></i>
+            <p class="text-white mt-4 lead">No tax protocols identified. Initialize your first rule by clicking the (+)
+                icon.</p>
+        </div>
+
+        <div class="table-responsive" *ngIf="!isLoading() && taxes().length > 0">
+            <table class="table table-dark table-hover align-middle mb-0">
+                <thead class="text-white small fw-bold text-uppercase ls-wide bg-glass">
+                    <tr>
+                        <th class="ps-4">Protocol Name</th>
+                        <th>Brief (Dec)</th>
+                        <th class="text-center">Rate (%)</th>
+                        <th class="text-center">Status</th>
+                        <th class="pe-4 text-end">Operations</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let tax of taxes()" class="border-glass">
+                        <td class="ps-4 py-4">
+                            <div class="d-flex align-items-center">
+                                <div class="p-2 rounded-3 bg-emerald-soft me-3">
+                                    <i class="bi bi-receipt text-emerald"></i>
+                                </div>
+                                <span class="fw-bold text-white">{{ tax.name }}</span>
+                            </div>
+                        </td>
+                        <td class="text-white small">{{ tax.description || 'N/A' }}</td>
+                        <td class="text-center fw-black text-emerald fs-5">{{ tax.percentage }}%</td>
+                        <td class="text-center">
+                            <span class="badge rounded-pill px-3 py-2"
+                                [ngClass]="tax.isActive ? 'badge-active' : 'badge-inactive'">
+                                {{ tax.isActive ? 'ACTIVE' : 'DEACTIVATED' }}
+                            </span>
+                        </td>
+                        <td class="pe-4 text-end">
+                            <div class="d-flex justify-content-end gap-2">
+                                <button class="btn btn-sm glass border-glass text-white btn-action"
+                                    (click)="editTax(tax)" title="Recalibrate">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <button class="btn btn-sm glass border-glass text-white btn-action"
+                                    (click)="deleteTax(tax.id)" title="Purge">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

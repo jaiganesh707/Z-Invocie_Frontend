@@ -34,6 +34,14 @@ export class ToastService {
         this.show(message, 'error');
     }
 
+    warning(message: string) {
+        this.show(message, 'warning');
+    }
+
+    info(message: string) {
+        this.show(message, 'info');
+    }
+
     remove(id: number) {
         const filtered = this.toasts$.value.filter(t => t.id !== id);
         this.toasts$.next(filtered);

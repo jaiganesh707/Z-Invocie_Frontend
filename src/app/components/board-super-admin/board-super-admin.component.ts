@@ -17,17 +17,21 @@ import { takeUntil } from 'rxjs/operators';
 })
 export class BoardSuperAdminComponent implements OnInit, OnDestroy {
     users: any[] = [];
+    primeUsers: any[] = [];
+    standardUsers: any[] = [];
     roles: any[] = [];
     form: any = {
         username: '',
         email: '',
-        password: ''
+        password: '',
+        role: 'ROLE_USER'
     };
     isSuccessful = false;
     isAddFailed = false;
     errorMessage = '';
     isEditing = false;
     selectedUserId?: number;
+    isPrimeUserCheck = false;
 
     private userSub?: Subscription;
     private roleSub?: Subscription;
@@ -37,7 +41,7 @@ export class BoardSuperAdminComponent implements OnInit, OnDestroy {
         private route: ActivatedRoute,
         private userService: UserService,
         private storageService: StorageService,
-        private toastService: ToastService
+        private toastService: ToastService,
     ) { }
 
     ngOnInit(): void {
@@ -46,19 +50,34 @@ export class BoardSuperAdminComponent implements OnInit, OnDestroy {
         // Initial data from Resolver
         const resolvedData = this.route.snapshot.data['data'];
         if (resolvedData) {
-            this.users = resolvedData.users.filter((u: any) => u.username !== currentUser?.username);
-            this.roles = resolvedData.roles;
+            // Filter: Only users created by SuperAdmin (parentUser is null) and exclude driver/sub-user roles
+            this.users = resolvedData.users.filter((u: any) => 
+                u.username !== currentUser?.username && 
+                !u.parentUser && 
+                ['ROLE_PRIME_USER', 'ROLE_USER', 'ROLE_ADMIN'].includes(u.role)
+            );
+            this.primeUsers = this.users.filter(u => u.role === 'ROLE_PRIME_USER');
+            this.standardUsers = this.users.filter(u => u.role === 'ROLE_USER' || u.role === 'ROLE_ADMIN');
+            this.roles = resolvedData.roles.filter((r: string) => 
+                ['ROLE_USER', 'ROLE_ADMIN'].includes(r)
+            );
         }
 
         this.fetchData();
 
         this.userSub = this.userService.users$.subscribe({
             next: users => {
-                this.users = users.filter(u => u.username !== currentUser?.username);
+                this.users = users.filter((u: any) => 
+                    u.username !== currentUser?.username && 
+                    !u.parentUser && 
+                    ['ROLE_PRIME_USER', 'ROLE_USER', 'ROLE_ADMIN'].includes(u.role)
+                );
+                this.primeUsers = this.users.filter(u => u.role === 'ROLE_PRIME_USER');
+                this.standardUsers = this.users.filter(u => u.role === 'ROLE_USER' || u.role === 'ROLE_ADMIN');
             }
         });
         this.roleSub = this.userService.roles$.subscribe({
-            next: roles => this.roles = roles
+            next: roles => this.roles = roles.filter(r => ['ROLE_USER', 'ROLE_ADMIN'].includes(r))
         });
 
         // Polling every 10 seconds for higher precision in Strategic Center
@@ -82,10 +101,12 @@ export class BoardSuperAdminComponent implements OnInit, OnDestroy {
     editUser(user: any): void {
         this.isEditing = true;
         this.selectedUserId = user.id;
+        this.isPrimeUserCheck = user.role === 'ROLE_PRIME_USER';
         this.form = {
             username: user.username,
             email: user.email,
-            password: '' // Don't show old password
+            password: '', // Don't show old password
+            role: user.role === 'ROLE_PRIME_USER' ? 'ROLE_USER' : user.role
         };
         // Scroll to form
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -102,8 +123,13 @@ export class BoardSuperAdminComponent implements OnInit, OnDestroy {
 
 
     onAddUser(): void {
+        const payload = { ...this.form };
+        if (this.isPrimeUserCheck) {
+            payload.role = 'ROLE_PRIME_USER';
+        }
+
         if (this.isEditing && this.selectedUserId) {
-            this.userService.updateUser(this.selectedUserId, this.form).subscribe({
+            this.userService.updateUser(this.selectedUserId, payload).subscribe({
                 next: () => {
                     this.toastService.success('Stakeholder credentials synchronized.');
                     this.resetForm();
@@ -114,7 +140,7 @@ export class BoardSuperAdminComponent implements OnInit, OnDestroy {
                 }
             });
         } else {
-            this.userService.createUser(this.form).subscribe({
+            this.userService.createUser(payload).subscribe({
                 next: (data: any) => {
                     this.toastService.success('Stakeholder credentials provisioned successfully.');
                     this.isSuccessful = true;
@@ -134,6 +160,10 @@ export class BoardSuperAdminComponent implements OnInit, OnDestroy {
     resetForm(): void {
         this.isEditing = false;
         this.selectedUserId = undefined;
-        this.form = { username: '', email: '', password: '' };
+        this.isPrimeUserCheck = false;
+        this.isSuccessful = false;
+        this.isAddFailed = false;
+        this.errorMessage = '';
+        this.form = { username: '', email: '', password: '', role: 'ROLE_USER' };
     }
 }

@@ -1,0 +1,527 @@
+<div class="glass-card p-5 animate-fade shadow-glow-emerald">
+    <div class="terminal-header d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-4">
+        <div class="d-flex align-items-center">
+            <div class="icon-orb bg-primary bg-opacity-10 me-4 shadow-sm" style="width: 65px; height: 65px; font-size: 1.8rem;">
+                <i class="bi bi-archive text-primary"></i>
+            </div>
+            <div>
+                <h2 class="text-white mb-1 fw-900 tracking-tighter fs-1">Billing Archive <span class="text-primary text-glow-emerald">Terminal</span></h2>
+                <p class="text-white-50 small mb-0 fw-500 ls-tight">Sovereign ledger of immutable financial archetypes</p>
+            </div>
+        </div>
+
+        <div class="d-flex flex-column flex-lg-row glass border-glass-soft rounded-4 p-2 shadow-inner overflow-hidden w-100 w-md-auto no-print">
+            <div class="d-flex align-items-center px-3 py-2 border-end-lg border-glass-soft">
+                <i class="bi bi-calendar2-range text-emerald me-3 fs-5"></i>
+                <div class="d-flex flex-column">
+                    <span class="text-emerald x-small fw-black ls-widest opacity-50 uppercase">START_DATE</span>
+                    <input type="date" id="startDate" name="startDate" [ngModel]="startDate()"
+                        (ngModelChange)="startDate.set($event); applyFilters()"
+                        class="bg-transparent border-0 text-white small fw-bold focus-none p-0"
+                        style="outline: none; width: 130px;">
+                </div>
+            </div>
+            <div class="d-flex align-items-center px-3 py-2 border-end-lg border-glass-soft">
+                <i class="bi bi-calendar2-check text-emerald me-3 fs-5"></i>
+                <div class="d-flex flex-column">
+                    <span class="text-emerald x-small fw-black ls-widest opacity-50 uppercase">END_DATE</span>
+                    <input type="date" id="endDate" name="endDate" [ngModel]="endDate()"
+                        (ngModelChange)="endDate.set($event); applyFilters()"
+                        class="bg-transparent border-0 text-white small fw-bold focus-none p-0"
+                        style="outline: none; width: 130px;">
+                </div>
+            </div>
+            <div class="d-flex align-items-center px-3 py-2 gap-2">
+                <button class="btn btn-action-emerald rounded-3" (click)="clearFilters()" title="Reset Filters">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+                <a routerLink="/create-invoice" class="btn-premium py-2 px-4 rounded-3 small fw-black ls-wide">
+                    <i class="bi bi-plus-lg me-2"></i>CREATE_RECORD
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="!isLoadingInvoices()">
+        <!-- SUMMARY CARDS -->
+        <div class="row g-4 mb-5 no-print">
+            <div class="col-md-4">
+                <div class="glass-card p-4 hover-lift border-0 shadow-sm animate-slide-up" style="background: rgba(251, 191, 36, 0.05);">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="icon-orb bg-amber bg-opacity-10 text-amber shadow-glow" style="width: 50px; height: 50px; font-size: 1.25rem;">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                        <span class="badge bg-amber bg-opacity-10 text-amber rounded-pill x-small fw-black ls-widest uppercase">AWAITING_AUTH</span>
+                    </div>
+                    <h2 class="text-white fw-900 mb-1 fs-1">{{ pendingInvoicesQueue().length }}</h2>
+                    <p class="text-amber x-small fw-black ls-widest mb-0 uppercase opacity-75">Pending Terminal Nodes</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-card p-4 hover-lift border-0 shadow-sm animate-slide-up" style="animation-delay: 0.1s; background: rgba(16, 185, 129, 0.05);">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="icon-orb bg-emerald bg-opacity-10 text-emerald shadow-glow" style="width: 50px; height: 50px; font-size: 1.25rem;">
+                            <i class="bi bi-patch-check"></i>
+                        </div>
+                        <span class="badge bg-emerald bg-opacity-10 text-emerald rounded-pill x-small fw-black ls-widest uppercase">CRYSTALLIZED</span>
+                    </div>
+                    <h2 class="text-white fw-900 mb-1 fs-1">{{ completedInvoicesArchive().length }}</h2>
+                    <p class="text-emerald x-small fw-black ls-widest mb-0 uppercase opacity-75">Finalized Archive Records</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="glass-card p-4 hover-lift border-0 shadow-sm animate-slide-up" style="animation-delay: 0.2s; background: rgba(59, 130, 246, 0.05);">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="icon-orb bg-blue bg-opacity-10 text-blue shadow-glow" style="width: 50px; height: 50px; font-size: 1.25rem;">
+                            <i class="bi bi-cash-stack"></i>
+                        </div>
+                        <span class="badge bg-blue bg-opacity-10 text-blue rounded-pill x-small fw-black ls-widest uppercase">NET_VALUATION</span>
+                    </div>
+                    <h2 class="text-white fw-900 mb-1 fs-1">₹{{ totalNetVolume() | number:'1.0-0' }}</h2>
+                    <p class="text-blue x-small fw-black ls-widest mb-0 uppercase opacity-75">Total Ledger Realization</p>
+                </div>
+            </div>
+        </div>
+        <!-- SECTION 1: PENDING AUTHORIZATION QUEUE
+        <div class="mb-5" *ngIf="pendingInvoicesQueue().length > 0">
+            <div class="d-flex align-items-center mb-3">
+                <div class="p-2 rounded-3 bg-amber bg-opacity-10 me-2">
+                    <i class="bi bi-shield-lock text-amber"></i>
+                </div>
+                <h5 class="text-amber small ls-wide fw-black mb-0 uppercase">PENDING AUTHORIZATION QUEUE</h5>
+                <span class="badge bg-amber bg-opacity-10 text-amber ms-3 rounded-pill">{{ pendingInvoicesQueue().length
+                    }} NODES AWAITING AUTH</span>
+            </div>
+
+            <div
+                class="table-responsive rounded-4 overflow-hidden border border-amber border-opacity-25 bg-glass mb-4 shadow-sm">
+                <table class="table table-dark table-hover mb-0">
+                    <thead>
+                        <tr class="bg-amber bg-opacity-10 text-muted opacity-75">
+                            <th class="ps-3 py-2 ls-wide x-small uppercase fw-black">ARCHIVE IDENTITY</th>
+                            <th class="py-2 ls-wide x-small uppercase fw-black d-none d-lg-table-cell">CREATOR IDENTITY
+                            </th>
+                            <th class="py-2 ls-wide x-small uppercase fw-black d-none d-md-table-cell">TIMESTAMP</th>
+                            <th class="py-2 text-center ls-wide x-small uppercase fw-black d-none d-lg-table-cell">
+                                SUMMARY</th>
+                            <th class="pe-3 py-2 text-end ls-wide x-small uppercase fw-black">REALIZED VALUE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let inv of pendingInvoicesQueue()" class="border-glass align-middle animate-fade">
+                            <td class="ps-3 py-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-box bg-amber bg-opacity-10 me-3 d-none d-sm-flex"
+                                        style="width: 40px; height: 40px; border-radius: 12px; align-items: center; justify-content: center;">
+                                        <i class="bi bi-receipt-cutoff text-amber"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-white fw-bold ls-tight mb-1 small-mobile-font text-truncate"
+                                            style="max-width: 150px;">
+                                            {{ inv.invoiceNumber || ('#ID-' + inv.id) }}
+                                        </div>
+                                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                                            <span class="text-amber x-small fw-bold" *ngIf="inv.customer">
+                                                <i class="bi bi-shop me-1"></i>{{ inv.customer.companyName }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-4 d-none d-lg-table-cell text-white-50 small">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-person-workspace text-amber opacity-50"></i>
+                                    {{ inv.creatorName || 'SYSTEM' }}
+                                </div>
+                            </td>
+                            <td class="py-4 d-none d-md-table-cell text-white-50 x-small fw-bold">
+                                {{ inv.createdAt | date:'MMM d, HH:mm' }}
+                            </td>
+                            <td class="py-4 text-center d-none d-lg-table-cell">
+                                <span
+                                    class="badge rounded-pill bg-amber-soft text-amber px-3 py-2 fw-black ls-wide x-small">
+                                    READY FOR AUTH
+                                </span>
+                            </td>
+                            <td class="pe-3 py-3 text-end">
+                                <div class="text-white fw-900">₹{{ inv.totalAmount | number:'1.2-2' }}</div>
+                                <div class="d-flex justify-content-end gap-2 mt-2">
+                                    <button class="btn btn-sm btn-glass text-white" (click)="viewInvoice(inv)">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button 
+                                        class="btn btn-sm btn-danger rounded-pill px-2 py-1"
+                                        (click)="deleteInvoice(inv.id!, inv.status || 'PENDING')">
+                                        <i class="bi bi-trash"></i>
+                                        </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div> -->
+
+
+        <!-- SECTION 2: DRAFT LEDGER RECORDS -->
+        <div class="mb-5" *ngIf="draftInvoices().length > 0">
+            <div class="d-flex align-items-center mb-3">
+                <div class="p-2 rounded-3 bg-info bg-opacity-10 me-2">
+                    <i class="bi bi-file-earmark-lock text-info"></i>
+                </div>
+                <h5 class="text-info small ls-wide fw-black mb-0 uppercase">DRAFT LEDGER RECORDS</h5>
+            </div>
+
+            <div
+                class="table-responsive rounded-4 overflow-hidden border border-info border-opacity-25 bg-glass mb-4 shadow-sm">
+                <table class="table table-dark table-hover mb-0">
+                    <thead>
+                        <tr class="bg-info bg-opacity-10 text-muted opacity-75">
+                            <th class="ps-3 py-2 ls-wide x-small uppercase fw-black">ARCHIVE IDENTITY</th>
+                            <th class="py-2 ls-wide x-small uppercase fw-black">TIMESTAMP</th>
+                            <th class="pe-3 py-2 text-end ls-wide x-small uppercase fw-black">PROPOSED VALUE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let inv of draftInvoices()" class="border-glass align-middle animate-fade">
+                            <td class="ps-3 py-3">
+                                <span class="text-white fw-bold">{{ inv.invoiceNumber || ('#ID-' + inv.id) }}</span>
+                                <div class="text-info opacity-75 x-small fw-bold">{{ inv.customer?.companyName }}</div>
+                            </td>
+                            <td class="py-3 text-white-50 x-small">{{ inv.updatedAt || inv.createdAt | date:'MMM d,
+                                HH:mm' }}</td>
+                            <td class="pe-3 py-3 text-end">
+                                <span class="text-white fw-black">₹{{ inv.totalAmount | number:'1.2-2' }}</span>
+                                <div class="mt-2 d-flex justify-content-end gap-2 flex-wrap">
+                                    <button class="btn btn-sm btn-glass text-info px-3 py-1 rounded-pill"
+                                        (click)="viewInvoice(inv)">
+                                        <i class="bi bi-eye me-1"></i>VIEW
+                                    </button>
+                                    <button class="btn btn-sm px-3 py-1 rounded-pill fw-bold"
+                                        style="background: linear-gradient(135deg, #00c9a7, #00a8e8); color: #fff; border: none; font-size: 0.7rem; letter-spacing: 0.04em;"
+                                        (click)="openSubmitModal(inv)">
+                                        <i class="bi bi-send-check me-1"></i>SEND TO APPROVER
+                                    </button>
+                                    <button 
+                                        class="btn btn-sm btn-danger rounded-pill px-2 py-1"
+                                        (click)="deleteInvoice(inv.id!, inv.status || 'DRAFT')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SECTION 3: FINALIZED BILLING ARCHIVE -->
+        <div class="mb-5">
+            <div class="d-flex align-items-center mb-3">
+                <div class="p-2 rounded-3 bg-emerald bg-opacity-10 me-2">
+                    <i class="bi bi-patch-check text-emerald"></i>
+                </div>
+                <h5 class="text-emerald small ls-wide fw-black mb-0 uppercase">FINALIZED BILLING ARCHIVE</h5>
+            </div>
+
+            <div
+                class="table-responsive rounded-4 overflow-hidden border border-emerald border-opacity-25 bg-glass mb-4">
+                <table class="table table-dark table-hover mb-0">
+                    <thead>
+                        <tr class="bg-emerald bg-opacity-10 text-muted opacity-75">
+                            <th class="ps-3 py-2 ls-wide x-small uppercase fw-black">ARCHIVE IDENTITY</th>
+                            <th class="py-2 ls-wide x-small uppercase fw-black d-none d-lg-table-cell">CREATOR IDENTITY
+                            </th>
+                            <th class="py-2 ls-wide x-small uppercase fw-black d-none d-md-table-cell">TIMESTAMP</th>
+                            <th class="py-2 text-center ls-wide x-small uppercase fw-black d-none d-lg-table-cell">
+                                SUMMARY</th>
+                            <th class="pe-3 py-2 text-end ls-wide x-small uppercase fw-black">REALIZED VALUE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let inv of completedInvoicesArchive()"
+                            class="border-glass align-middle animate-fade">
+                            <td class="ps-3 py-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-box bg-emerald bg-opacity-10 me-3 d-none d-sm-flex"
+                                        style="width: 40px; height: 40px; border-radius: 12px; align-items: center; justify-content: center;">
+                                        <i class="bi bi-receipt text-emerald"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-white fw-bold ls-tight mb-1 small-mobile-font text-truncate"
+                                            style="max-width: 150px;">
+                                            {{ inv.invoiceNumber || ('#ID-' + inv.id) }}
+                                        </div>
+                                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                                            <span class="text-emerald x-small fw-bold" *ngIf="inv.customer">
+                                                <i class="bi bi-shop me-1"></i>{{ inv.customer.companyName }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-4 d-none d-lg-table-cell">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="icon-box bg-white bg-opacity-5 rounded-pill d-flex align-items-center justify-content-center"
+                                        style="width: 24px; height: 24px;" *ngIf="inv.creatorName">
+                                        <i class="bi"
+                                            [ngClass]="inv.createdBy && inv.createdBy.role === 'ROLE_PRIME_USER' ? 'bi-star-fill text-gold' : 'bi-person-circle text-white-50'"
+                                            style="font-size: 0.75rem;"></i>
+                                    </div>
+                                    <div class="d-flex flex-column">
+                                        <span class="text-white small fw-bold ls-tight" *ngIf="inv.creatorName">
+                                            {{ inv.creatorName }}
+                                        </span>
+                                        <span class="text-white-50 x-small opacity-50 fw-600 ls-wide"
+                                            *ngIf="inv.creatorName">
+                                            {{ inv.createdBy ? inv.createdBy.role.replace('ROLE_', '') : 'WORKFLOW_USER'
+                                            }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-4 d-none d-md-table-cell text-white-50 x-small">
+                                {{ inv.createdAt | date:'MMM d, HH:mm' }}
+                            </td>
+                            <td class="py-4 text-center d-none d-lg-table-cell">
+                                <span
+                                    class="badge rounded-pill bg-emerald-soft text-emerald px-3 py-2 ls-wide x-small uppercase fw-black">
+                                    AUTHORIZED
+                                </span>
+                            </td>
+                            <td class="pe-3 py-3 text-end">
+                                <div class="text-white fw-bold">₹{{ inv.totalAmount | number:'1.2-2' }}</div>
+                                <div class="badge rounded-pill smaller opacity-75 mt-1 d-inline-flex align-items-center"
+                                    [ngClass]="inv.balanceAmount && inv.balanceAmount > 0 ? 'bg-warning-soft text-warning' : 'bg-emerald-soft text-emerald'">
+                                    <i class="bi me-1"
+                                        [ngClass]="inv.balanceAmount && inv.balanceAmount > 0 ? 'bi-clock-history' : 'bi-check-circle-fill'"></i>
+                                    {{ inv.balanceAmount && inv.balanceAmount > 0 ? 'PENDING: ₹' + (inv.balanceAmount |
+                                    number:'1.2-2') : 'SETTLED' }}
+                                </div>
+                                <div class="d-flex justify-content-end gap-2 mt-3 no-print">
+                                    <button class="btn btn-sm glass border-glass text-white btn-action animate-hover"
+                                        (click)="viewInvoice(inv)">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm glass border-glass text-white btn-action animate-hover"
+                                        (click)="printInvoice(inv)">
+                                        <i class="bi bi-printer"></i>
+                                    </button>
+                                    <button 
+                                        class="btn btn-sm btn-danger rounded-pill px-2 py-1"
+                                        (click)="deleteInvoice(inv.id!, inv.status || 'COMPLETED')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr *ngIf="completedInvoicesArchive().length === 0">
+                            <td colspan="5" class="py-5 text-center opacity-25">NO FINALIZED ARCHIVE RECORDS</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        
+    </div>
+</div>
+<!-- DETAILED VIEW MODAL -->
+<div class="view-overlay" *ngIf="selectedInvoice()" (click)="closeView()">
+    <div class="view-modal animate-slide-up" (click)="$event.stopPropagation()">
+        <div class="modal-header-glass p-4 d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="text-white mb-0 ls-tight fw-900">LEDGER FORENSICS</h4>
+                <p class="text-emerald small mb-0 fw-bold opacity-75">{{ selectedInvoice()?.invoiceNumber }}</p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-glass text-white px-3" (click)="printInvoice(selectedInvoice()!)"
+                    *ngIf="selectedInvoice()">
+                    <i class="bi bi-printer me-2"></i>PRINT ARCHIVE
+                </button>
+                <button class="btn btn-outline-light border-0 fs-4" (click)="closeView()">&times;</button>
+            </div>
+        </div>
+
+        <div class="modal-body-glass p-4 scrollbar-custom" style="max-height: 70vh; overflow-y: auto;">
+            <!-- Stakeholder Info -->
+            <div class="row mb-5 g-4">
+                <div class="col-md-6">
+                    <label class="ls-wide x-small fw-black text-emerald opacity-50 mb-3 uppercase">ESTABLISHMENT</label>
+                    <div class="glass-info-node p-3 rounded-4">
+                        <h5 class="text-white mb-1">{{ selectedInvoice()?.customer?.companyName }}</h5>
+                        <div class="text-white-50 x-small mb-1" style="white-space: pre-line;">{{
+                            selectedInvoice()?.billingAddress || (selectedInvoice()?.customer?.address + ', ' +
+                            selectedInvoice()?.customer?.city) }}</div>
+                        <div class="text-emerald x-small fw-bold mb-0">GST: {{ selectedInvoice()?.customerGstin ||
+                            selectedInvoice()?.customer?.gstin || 'N/A' }}</div>
+                        <p class="text-white-50 x-small mb-0 mt-2 opacity-50"><i class="bi bi-envelope me-1"></i> {{
+                            selectedInvoice()?.customer?.email }}</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label class="ls-wide x-small fw-black text-emerald opacity-50 mb-3 uppercase">LOGISTICS
+                        IDENTITY</label>
+                    <div class="glass-info-node p-3 rounded-4">
+                        <div class="d-flex align-items-center mb-2" *ngIf="selectedInvoice()?.assignedDriver">
+                            <i class="bi bi-truck me-2 text-emerald"></i>
+                            <span class="text-white small fw-bold">{{ selectedInvoice()?.assignedDriver.username
+                                }}</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-activity me-2 text-emerald"></i>
+                            <span class="badge" [ngClass]="{
+                                'bg-emerald-soft text-emerald': selectedInvoice()?.deliveryStatus === 'COMPLETED',
+                                'bg-warning-soft text-warning': selectedInvoice()?.deliveryStatus === 'IN_TRANSIT',
+                                'bg-info-soft text-info': selectedInvoice()?.deliveryStatus === 'ASSIGNED'
+                            }">{{ selectedInvoice()?.deliveryStatus || 'PENDING' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Itemization -->
+            <label class="ls-wide x-small fw-black text-emerald opacity-50 mb-3 uppercase">TRANSACTION
+                ITEMIZATION</label>
+            <div class="table-responsive rounded-4 overflow-hidden border border-glass bg-glass-dark mb-4">
+                <table class="table table-dark table-hover mb-0">
+                    <thead>
+                        <tr class="bg-glass-soft text-muted x-small">
+                            <th class="ps-3 py-2 fw-black ls-wide">IDENTITY</th>
+                            <th class="py-2 text-center fw-black ls-wide">QUANTITY</th>
+                            <th class="py-2 text-end fw-black ls-wide">VALUATION</th>
+                            <th class="pe-3 py-2 text-end fw-black ls-wide">SUBTOTAL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of selectedInvoice()?.items" class="border-glass align-middle x-small">
+                            <td class="ps-3 py-3">
+                                <div class="text-white fw-bold">{{ item.foodItem.name }}</div>
+                                <div class="text-white opacity-50" *ngIf="item.foodItem.uniqueCode">{{
+                                    item.foodItem.uniqueCode }}</div>
+                            </td>
+                            <td class="py-3 text-center text-white">{{ item.quantity }}</td>
+                            <td class="py-3 text-end text-white-50">₹{{ item.price | number:'1.2-2' }}</td>
+                            <td class="pe-3 py-3 text-end text-emerald fw-bold">₹{{ (item.price * item.quantity) |
+                                number:'1.2-2' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Summary with Realized Settlement -->
+            <div class="p-4 rounded-4 bg-glass border border-glass">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-white opacity-75 small">SUBTOTAL (Invoice Assets)</span>
+                    <span class="text-white fw-bold">₹{{ selectedInvoice()?.totalAmount | number:'1.2-2' }}</span>
+                </div>
+
+
+                <div class="d-flex justify-content-between align-items-center border-top border-glass-soft pt-3 mb-4">
+                    <span class="text-white fw-900 h6 mb-0 uppercase ls-wide">TOTAL REALIZED LIABILITY</span>
+                    <!-- The effective liability at the time of print/view -->
+                    <h2 class="text-white mb-0 fw-900">₹{{ (selectedInvoice()?.totalAmount || 0) | number:'1.2-2' }}
+                    </h2>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-flex">
+                        <div
+                            class="bg-black bg-opacity-25 p-3 rounded-4 border text-center border-emerald border-opacity-25">
+                            <span class="text-emerald x-small fw-black ls-widest uppercase d-block mb-1">SETTLED
+                                (PAID)</span>
+                            <span class="text-white fw-bold h4">₹{{ selectedInvoice()?.totalAmount | number:'1.2-2'
+                                }}</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SUBMIT FOR APPROVAL MODAL ═══ -->
+<div class="view-overlay" *ngIf="submitModalInvoice()" (click)="closeSubmitModal()">
+    <div class="view-modal animate-slide-up" style="max-width: 520px;" (click)="$event.stopPropagation()">
+
+        <!-- Header -->
+        <div class="modal-header-glass p-4 d-flex justify-content-between align-items-center"
+            style="background: linear-gradient(135deg, rgba(0,201,167,0.12), rgba(0,168,232,0.08));">
+            <div class="d-flex align-items-center gap-3">
+                <div class="p-2 rounded-3" style="background: rgba(0,201,167,0.15);">
+                    <i class="bi bi-send-check fs-4" style="color: #00c9a7;"></i>
+                </div>
+                <div>
+                    <h5 class="text-white mb-0 fw-900 ls-tight">SUBMIT FOR APPROVAL</h5>
+                    <p class="mb-0 x-small fw-bold opacity-50" style="color: #00c9a7;">
+                        {{ submitModalInvoice()?.invoiceNumber }}
+                    </p>
+                </div>
+            </div>
+            <button class="btn btn-outline-light border-0 fs-4" (click)="closeSubmitModal()">&#x2715;</button>
+        </div>
+
+        <!-- Body -->
+        <div class="modal-body-glass p-4">
+
+            <!-- Invoice Summary strip -->
+            <div class="rounded-4 p-3 mb-4 d-flex justify-content-between align-items-center"
+                style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);">
+                <div>
+                    <div class="text-white-50 x-small fw-black ls-wide uppercase mb-1">CUSTOMER</div>
+                    <div class="text-white fw-bold small">{{ submitModalInvoice()?.customer?.companyName || 'N/A' }}</div>
+                </div>
+                <div class="text-end">
+                    <div class="text-white-50 x-small fw-black ls-wide uppercase mb-1">PROPOSED VALUE</div>
+                    <div class="fw-900 h5 mb-0" style="color: #00c9a7;">₹{{ submitModalInvoice()?.totalAmount | number:'1.2-2' }}</div>
+                </div>
+            </div>
+
+            <!-- Reason input -->
+            <div class="mb-4">
+                <label class="text-white-50 x-small fw-black ls-wide uppercase mb-2 d-block">
+                    <i class="bi bi-chat-square-text me-1"></i>SUBMISSION REASON <span style="color:#ef4444;">*</span>
+                </label>
+                <textarea
+                    id="submissionNoteInput"
+                    class="form-control bg-transparent border-glass text-white rounded-3"
+                    rows="4"
+                    placeholder="Describe why this invoice is being submitted for approval (e.g. delivery confirmed, customer agreed to terms, etc.)"
+                    style="resize: none; font-size: 0.875rem; outline: none; box-shadow: none;"
+                    [(ngModel)]="submissionNote"
+                    maxlength="1000">
+                </textarea>
+                <div class="text-end x-small opacity-40 mt-1">{{ submissionNote.length }}/1000</div>
+            </div>
+
+            <!-- Notice banner -->
+            <div class="rounded-3 p-3 mb-4 d-flex align-items-start gap-2"
+                style="background: rgba(0,201,167,0.07); border: 1px solid rgba(0,201,167,0.2);">
+                <i class="bi bi-info-circle-fill mt-1" style="color: #00c9a7; flex-shrink:0;"></i>
+                <p class="text-white-50 x-small mb-0">
+                    Submitting will change the invoice status from <strong class="text-info">DRAFT</strong> to
+                    <strong style="color:#00c9a7;">CREATED</strong> and forward it to the approver's queue for authorization.
+                </p>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex gap-3">
+                <button class="btn btn-glass text-white flex-fill rounded-pill py-2"
+                    (click)="closeSubmitModal()" [disabled]="isSubmitting()">
+                    CANCEL
+                </button>
+                <button class="btn flex-fill rounded-pill py-2 fw-black"
+                    style="background: linear-gradient(135deg, #00c9a7, #00a8e8); color: #fff; border: none; letter-spacing: 0.05em;"
+                    (click)="submitForApproval()" [disabled]="isSubmitting() || !submissionNote.trim()">
+                    <span *ngIf="!isSubmitting()">
+                        <i class="bi bi-send-check me-2"></i>SUBMIT TO APPROVER
+                    </span>
+                    <span *ngIf="isSubmitting()">
+                        <span class="spinner-border spinner-border-sm me-2" role="status"></span>SUBMITTING...
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

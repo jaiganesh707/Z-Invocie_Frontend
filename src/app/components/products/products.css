@@ -1,0 +1,169 @@
+.catalog-card {
+    background: linear-gradient(165deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+    backdrop-filter: blur(25px);
+    border-radius: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 1rem;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+    height: 480px; /* Fixed Constant Height */
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.catalog-card:hover {
+    transform: translateY(-8px);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(16, 185, 129, 0.4);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+}
+
+.glass-reflection {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(to right,
+            transparent,
+            rgba(255, 255, 255, 0.1),
+            transparent);
+    transform: skewX(-25deg);
+    transition: left 0.7s ease-in-out;
+}
+
+.catalog-card:hover .glass-reflection {
+    left: 150%;
+}
+
+.asset-thumb-orb {
+    width: 100%;
+    aspect-ratio: 1/1; /* Square Aspect Ratio for consistency */
+    border-radius: 12px;
+    background: #fff; /* Solid white background like the screenshot shows for products */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+}
+
+.asset-thumb-orb img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.catalog-card:hover .asset-thumb-orb img {
+    transform: scale(1.08);
+}
+
+.value-footer {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 0.75rem;
+    margin-top: auto;
+}
+
+.info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.label-text {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(16, 185, 129, 0.7);
+}
+
+.val-text {
+    font-size: 0.95rem;
+    font-weight: 900;
+    color: #fff;
+}
+
+.text-gold {
+    color: #fbbf24;
+}
+
+.badge-stock {
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    font-weight: 900;
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.description-text {
+    font-size: 0.8rem;
+    color: rgba(16, 185, 129, 0.6);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.action-bar {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+}
+
+.btn-action {
+    flex: 1;
+    border-radius: 12px;
+    padding: 0.6rem;
+    font-weight: 900;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    transition: all 0.3s;
+    border: 1px solid transparent;
+}
+
+.btn-edit {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.btn-edit:hover {
+    background: #10b981;
+    color: #000;
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+}
+
+.btn-purge {
+    background: rgba(244, 63, 94, 0.1);
+    color: #f43f5e;
+    border-color: rgba(244, 63, 94, 0.2);
+}
+
+.btn-purge:hover {
+    background: #f43f5e;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(244, 63, 94, 0.4);
+}
+
+.catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.25rem;
+}

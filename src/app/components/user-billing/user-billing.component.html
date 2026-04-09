@@ -51,48 +51,54 @@
                         placeholder="Search keywords, items..." [(ngModel)]="searchQuery">
                 </div>
             </div>
-            <div class="row g-4">
-                <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12" *ngFor="let item of filteredFoodItems">
-                    <div class="catalog-card shadow-lg">
-                        <!-- Premium Preview Area -->
-                        <div class="asset-icon-box mb-4 position-relative shadow-sm">
-                            <img *ngIf="item.imageUrl" [src]="getImageUrl(item.imageUrl)"
-                                class="w-100 h-100 object-fit-cover" alt="Asset Preview">
-                            <div *ngIf="!item.imageUrl" class="d-flex align-items-center justify-content-center h-100">
-                                <i class="bi bi-box-seam fs-1 text-emerald opacity-25"></i>
+
+            <!-- Premium Scrollable Grid -->
+            <div class="product-grid-scroll-vault" style="max-height: 650px; overflow-y: auto; padding-right: 10px;">
+                <div class="row g-4">
+                    <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12" *ngFor="let item of filteredFoodItems">
+                        <div class="catalog-card shadow-lg hover-lift">
+                            <!-- Premium Preview Area -->
+                            <div class="asset-icon-box mb-4 position-relative shadow-sm">
+                                <img *ngIf="item.imageUrl" [src]="getImageUrl(item.imageUrl)"
+                                    class="w-100 h-100 object-fit-cover" alt="Asset Preview">
+                                <div *ngIf="!item.imageUrl"
+                                    class="d-flex align-items-center justify-content-center h-100">
+                                    <i class="bi bi-box-seam fs-1 text-emerald opacity-25"></i>
+                                </div>
+                                <div class="glass-reflection"></div>
                             </div>
-                            <div class="glass-reflection"></div>
-                        </div>
 
-                        <div class="text-start mb-3">
-                            <h6 class="fw-bold text-white mb-2 ls-tight text-truncate" [title]="item.name">{{ item.name
-                                }}</h6>
-                            <p *ngIf="item.description" class="text-muted small mb-3 text-truncate-2"
-                                style="font-size: 0.75rem;">{{ item.description }}</p>
-                            <span class="text-emerald fw-bold fs-4">
-                                {{ item.currency === 'USD' ? '$' : '₹' }}{{ item.price | number:'1.2-2' }}
-                            </span>
-                        </div>
+                            <div class="text-start mb-3">
+                                <h6 class="fw-bold text-white mb-2 ls-tight text-truncate" [title]="item.name">{{
+                                    item.name
+                                    }}</h6>
+                                <p *ngIf="item.description" class="text-muted small mb-3 text-truncate-2"
+                                    style="font-size: 0.75rem;">{{ item.description }}</p>
+                                <span class="text-emerald fw-bold fs-4">
+                                    {{ item.currency === 'USD' ? '$' : '₹' }}{{ item.price | number:'1.2-2' }}
+                                </span>
+                            </div>
 
-                        <!-- Precision Quantity Dispatcher -->
-                        <div class="quantity-selector">
-                            <button class="quantity-btn"
-                                (click)="qtyInput.value = (+qtyInput.value > 1 ? +qtyInput.value - 1 : 1).toString()">
-                                <i class="bi bi-dash-circle"></i>
+                            <!-- Precision Quantity Dispatcher -->
+                            <div class="quantity-selector">
+                                <button class="quantity-btn"
+                                    (click)="qtyInput.value = (+qtyInput.value > 1 ? +qtyInput.value - 1 : 1).toString()">
+                                    <i class="bi bi-dash-circle"></i>
+                                </button>
+                                <input type="number" #qtyInput value="1" min="1"
+                                    class="border-0 bg-transparent text-white text-center fw-bold"
+                                    style="width: 35px; outline: none; font-size: 1rem;">
+                                <button class="quantity-btn"
+                                    (click)="qtyInput.value = (+qtyInput.value + 1).toString()">
+                                    <i class="bi bi-plus-circle"></i>
+                                </button>
+                            </div>
+
+                            <button class="commit-to-ledger d-flex align-items-center justify-content-center"
+                                (click)="addToBill(item, +qtyInput.value)">
+                                <i class="bi bi-plus-lg me-2"></i> <span>COMMIT TO LEDGER</span>
                             </button>
-                            <input type="number" #qtyInput value="1" min="1"
-                                class="border-0 bg-transparent text-white text-center fw-bold"
-                                style="width: 35px; outline: none; font-size: 1rem;">
-                            <button class="quantity-btn" (click)="qtyInput.value = (+qtyInput.value + 1).toString()">
-                                <i class="bi bi-plus-circle"></i>
-                            </button>
                         </div>
-
-                        <!-- Add to Cart Action -->
-                        <button class="commit-to-ledger d-flex align-items-center justify-content-center"
-                            (click)="addToBill(item, +qtyInput.value)">
-                            <i class="bi bi-plus-lg me-2"></i> <span>COMMIT TO LEDGER</span>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -133,6 +139,24 @@
                 </div>
                 <!-- ... no items message ... -->
             </div>
+            
+            <!-- Tax Breakdown Panel -->
+            <div class="p-3 bg-glass border border-glass rounded-4 mb-3" *ngIf="selectedItems.length > 0">
+                <div class="d-flex justify-content-between text-white opacity-75 small mb-2">
+                    <span>Gross Subtotal</span>
+                    <span>₹{{ subtotal | number:'1.2-2' }}</span>
+                </div>
+                <div class="d-flex justify-content-between text-gold opacity-75 small mb-2" *ngFor="let tax of activeTaxes">
+                    <span>{{ tax.name }} ({{ tax.percentage }}%)</span>
+                    <span>₹{{ (subtotal * tax.percentage / 100) | number:'1.2-2' }}</span>
+                </div>
+                <hr class="border-glass my-2">
+                <div class="d-flex justify-content-between text-white fw-bold fs-5 mt-2">
+                    <span>Total Settlement</span>
+                    <span class="text-emerald">₹{{ totalAmount | number:'1.2-2' }}</span>
+                </div>
+            </div>
+
             <div class="border-top border-glass pt-4">
                 <button class="btn btn-premium-outline w-100 py-3 mb-3 rounded-pill">
                     <i class="bi bi-tag-fill me-2"></i> APPLY PROMO CODE
@@ -152,12 +176,13 @@
             </div>
         </div>
     </div>
+
 </div>
 
 <!-- Bill Formate to Print -->
-<div class="row mt-5 justify-content-center animate-slide" *ngIf="isGenerated">
-    <div class="col-md-10">
-        <div class="glass-card shadow-2xl p-0 overflow-hidden" id="printableBill">
+<div class="row mt-4 justify-content-center animate-slide" *ngIf="isGenerated">
+    <div class="col-12 col-xl-11">
+        <div class="glass-card shadow-2xl p-0 overflow-hidden" id="printableBill" style="border-radius: 20px;">
             <!-- Glass Header for UI, Simple for Print -->
             <!-- Premium Statement Header -->
             <div class="invoice-premium-header no-print">
@@ -272,25 +297,28 @@
 
 
                     <div class="row mb-5 gy-4">
-                        <div class="col-sm-6">
+                        <div class="col-md-6 col-sm-12">
                             <h6 class="text-uppercase text-muted fw-bold mb-3 ls-wide">Recipient Details</h6>
                             <div class="fs-5 text-dark fw-semibold">{{ generatedInvoice.user.username }}</div>
                             <div class="text-muted">{{ generatedInvoice.user.email }}</div>
                             <div class="text-muted mt-2">Client ID: #{{ userId }}</div>
                         </div>
-                        <div class="col-sm-6 text-sm-end">
+                        <div class="col-md-6 col-sm-12 text-md-end text-start">
                             <h6 class="text-uppercase text-muted fw-bold mb-3 ls-wide">Invoice Info</h6>
                             <div class="fs-5 text-dark fw-semibold">Statement #{{ generatedInvoice.id }}</div>
                             <div class="text-muted">{{ generatedInvoice.createdAt | date:'MMMM d, yyyy' }}</div>
                             <div class="text-muted">{{ generatedInvoice.createdAt | date:'h:mm a' }}</div>
+                            <div class="text-emerald fw-bold small mt-2" *ngIf="generatedInvoice.createdBy">
+                                Authorized Origin: {{ generatedInvoice.createdBy.username | uppercase }}
+                            </div>
                         </div>
                     </div>
 
-                    <div class="table-responsive-sm">
-                        <table class="table table-borderless fs-5">
+                    <div class="table-responsive">
+                        <table class="table table-borderless fs-5 mb-0">
                             <thead class="border-bottom-2 border-dark">
                                 <tr class="text-muted">
-                                    <th class="py-3">Line Item</th>
+                                    <th class="py-3 text-start">Line Item</th>
                                     <th class="py-3 text-center">Unit Price</th>
                                     <th class="py-3 text-center">Qty</th>
                                     <th class="py-3 text-end">Extended Price</th>
@@ -299,8 +327,8 @@
                             <tbody>
                                 <tr *ngFor="let item of generatedInvoice.items; let i = index"
                                     class="border-bottom border-light">
-                                    <td class="py-4">
-                                        <div class="fw-bold fs-5">{{ item.foodItem.name }}</div>
+                                    <td class="py-4 text-start">
+                                        <div class="fw-bold fs-5 text-dark text-break">{{ item.foodItem.name }}</div>
                                         <div class="text-muted small">ID: {{ item.foodItem.id }}</div>
                                     </td>
                                     <td class="py-4 text-center">
@@ -316,26 +344,28 @@
                         </table>
                     </div>
 
-                    <div class="row pt-5">
-                        <div class="col-lg-5 col-sm-12 ms-auto">
-                            <div class="p-4 bg-light rounded-4">
+                    <div class="row pt-4 pb-2">
+                        <div class="col-xl-5 col-lg-6 col-md-8 col-sm-12 ms-auto">
+                            <div class="p-4 bg-light rounded-4 border shadow-sm">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="text-muted">Total Gross Assets</span>
-                                    <span>
+                                    <span class="text-muted fw-bold">Gross Subtotal</span>
+                                    <span class="fw-bold">
                                         {{ generatedInvoice.items[0]?.foodItem?.currency === 'USD' ? '$' : '₹' }}{{
-                                        generatedInvoice.totalAmount }}
+                                        subtotal | number:'1.2-2' }}
                                     </span>
                                 </div>
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="text-muted">Surcharge (WAIVED)</span>
-                                    <span>$0.00 / ₹0.00</span>
-                                </div>
+                                <ng-container *ngIf="activeTaxes.length > 0">
+                                    <div class="d-flex justify-content-between align-items-center mb-2" *ngFor="let tax of activeTaxes">
+                                        <span class="text-muted small">+ {{ tax.name }} ({{ tax.percentage }}%)</span>
+                                        <span class="text-muted small">{{ generatedInvoice.items[0]?.foodItem?.currency === 'USD' ? '$' : '₹' }}{{ (subtotal * tax.percentage / 100) | number:'1.2-2' }}</span>
+                                    </div>
+                                </ng-container>
                                 <hr class="my-3">
                                 <div class="d-flex justify-content-between align-items-center h3 mb-0">
-                                    <span class="fw-bold">Net Asset Value (NAV)</span>
-                                    <span class="fw-bold text-emerald">
+                                    <span class="fw-bold">Net Settlement (NAV)</span>
+                                    <span class="fw-bold text-success">
                                         {{ generatedInvoice.items[0]?.foodItem?.currency === 'USD' ? '$' : '₹' }}{{
-                                        generatedInvoice.totalAmount }}
+                                        generatedInvoice.totalAmount | number:'1.2-2' }}
                                     </span>
                                 </div>
                             </div>

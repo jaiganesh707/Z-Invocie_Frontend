@@ -1,12 +1,14 @@
-import { Component, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { UserAnalyticsComponent } from '../user-analytics/user-analytics';
 import { FoodItemService } from '../../services/food-item.service';
 import { UserService } from '../../services/user.service';
+import { StorageService } from '../../services/storage.service';
 import { ToastService } from '../../services/toast.service';
 import { InvoiceService } from '../../services/invoice.service';
+import { TaxService, CustomTax } from '../../services/tax.service';
 import { FoodItem } from '../../models/food-item.model';
 import { Invoice } from '../../models/invoice.model';
 import { interval, Subject } from 'rxjs';
@@ -174,6 +176,20 @@ import { environment } from '../../../environments/environment';
       --bs-table-bg: transparent;
       --bs-table-border-color: rgba(255, 255, 255, 0.05);
     }
+    .btn-action {
+      padding: 0.5rem;
+      width: 38px;
+      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      transition: all 0.3s;
+    }
+    .btn-action:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: scale(1.1);
+    }
     input[type="date"]::-webkit-calendar-picker-indicator {
       filter: invert(1) brightness(0.5) sepia(1) saturate(5) hue-rotate(100deg);
       cursor: pointer;
@@ -185,6 +201,13 @@ export class StakeholderHubComponent implements OnInit, OnDestroy {
   user: any = null;
   activeTab = signal<string>('analytics');
   isAdding = signal<boolean>(false);
+  roles: string[] = [];
+
+  // Taxes
+  taxes = signal<CustomTax[]>([]);
+  isAddingTax = signal<boolean>(false);
+  editingTaxId: number | null = null;
+  newTax: CustomTax = { userId: 0, name: '', percentage: 0, description: '', isActive: true };
 
   nodeConfig = {
     upiId: '',
@@ -196,6 +219,11 @@ export class StakeholderHubComponent implements OnInit, OnDestroy {
   startDate = signal<string>('');
   endDate = signal<string>('');
   invoices = signal<Invoice[]>([]);
+  primeInvoices = signal<any[]>([]);
+
+  private storageService = inject(StorageService);
+  isSuperAdmin = false;
+
   isLoadingInvoices = signal<boolean>(false);
 
   foodItems = signal<FoodItem[]>([]);
@@ -226,17 +254,23 @@ export class StakeholderHubComponent implements OnInit, OnDestroy {
     private userService: UserService,
     private foodItemService: FoodItemService,
     private invoiceService: InvoiceService,
+    private taxService: TaxService,
     private toastService: ToastService
   ) { }
 
   ngOnInit(): void {
+    const userObj = this.storageService.getUser();
+    this.isSuperAdmin = userObj?.role === 'ROLE_SUPER_ADMIN';
+
     this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
       const id = params['userId'];
       if (id) {
         this.userId.set(+id);
+        this.newTax.userId = this.userId();
         this.fetchUser();
         this.fetchCatalog();
-        // Removed fetchInvoices from here to prevent redundant calling on init
+        this.fetchRoles();
+        this.fetchTaxes();
       }
     });
 
@@ -263,7 +297,28 @@ export class StakeholderHubComponent implements OnInit, OnDestroy {
         this.nodeConfig.upiId = this.user.upiId || '';
         this.nodeConfig.payeeName = this.user.payeeName || '';
         this.nodeConfig.currency = this.user.currency || 'INR';
+        this.settingsForm = {
+          username: this.user.username,
+          email: this.user.email,
+          role: this.user.role,
+          contactNumber: this.user.contactNumber
+        };
+        this.activeTab.set('analytics');
       }
+    });
+  }
+
+  settingsForm: any = {
+    username: '',
+    email: '',
+    role: '',
+    contactNumber: ''
+  };
+
+
+  fetchRoles() {
+    this.userService.roles$.subscribe(roles => {
+      this.roles = roles;
     });
   }
 
@@ -287,6 +342,9 @@ export class StakeholderHubComponent implements OnInit, OnDestroy {
     this.invoiceService.getByUser(this.userId(), startIso, endIso).subscribe({
       next: (data) => {
         this.invoices.set(data);
+        // Separate invoices: Prime vs Sub-User
+        const prime = data.filter(inv => !inv.createdBy || inv.createdBy.id === this.userId());
+        this.primeInvoices.set(prime);
         this.isLoadingInvoices.set(false);
       },
       error: () => {
@@ -308,6 +366,12 @@ export class StakeholderHubComponent implements OnInit, OnDestroy {
     this.fetchInvoices();
   }
 
+  fetchTaxes() {
+    this.taxService.getAllForUser(this.userId()).subscribe({
+      next: (data) => this.taxes.set(data),
+      error: () => this.toastService.show('Failed to fetch custom taxes', 'error')
+    });
+  }
 
   setTab(tab: string) {
     this.activeTab.set(tab);
@@ -318,6 +382,19 @@ export class StakeholderHubComponent implements OnInit, OnDestroy {
 
   updateConfig() {
     this.toastService.show('Billing configuration updated for user', 'success');
+  }
+
+  saveAccountSettings() {
+    const payload = {
+      ...this.settingsForm,
+      upiId: this.nodeConfig.upiId,
+      payeeName: this.nodeConfig.payeeName,
+      currency: this.nodeConfig.currency
+    };
+    this.userService.updateUser(this.userId(), payload).subscribe({
+      next: () => this.toastService.show('Stakeholder credentials and security synchronized.', 'success'),
+      error: () => this.toastService.show('Failed to synchronize credentials.', 'error')
+    });
   }
 
   saveNodeConfig() {
@@ -448,4 +525,57 @@ export class StakeholderHubComponent implements OnInit, OnDestroy {
     if (url.startsWith('http')) return url;
     return url.startsWith('/') ? `${environment.apiUrl}${url}` : `${environment.apiUrl}/${url}`;
   }
+
+  // Tax Management Methods
+  saveTax() {
+    if (!this.newTax.name || this.newTax.percentage < 0) {
+      this.toastService.show('Please provide valid taxon credentials', 'warning');
+      return;
+    }
+
+    if (this.editingTaxId) {
+      this.taxService.update(this.editingTaxId, this.userId(), this.newTax).subscribe({
+        next: () => {
+          this.toastService.show('Taxon rules synchronized', 'success');
+          this.fetchTaxes();
+          this.resetTaxForm();
+        },
+        error: () => this.toastService.show('Failed to synchronize taxon rules', 'error')
+      });
+    } else {
+      this.taxService.create(this.userId(), this.newTax).subscribe({
+        next: () => {
+          this.toastService.show('New taxon applied to matrix', 'success');
+          this.fetchTaxes();
+          this.resetTaxForm();
+        },
+        error: () => this.toastService.show('Failed to apply taxon', 'error')
+      });
+    }
+  }
+
+  editTax(tax: CustomTax) {
+    this.newTax = { ...tax };
+    this.editingTaxId = tax.id!;
+    this.isAddingTax.set(true);
+  }
+
+  deleteTax(id: number) {
+    if (confirm('Irreversibly purge this taxon constraint?')) {
+      this.taxService.delete(id, this.userId()).subscribe({
+        next: () => {
+          this.toastService.show('Taxon purged', 'success');
+          this.fetchTaxes();
+        },
+        error: () => this.toastService.show('Failed to purge taxon', 'error')
+      });
+    }
+  }
+
+  resetTaxForm() {
+    this.newTax = { userId: this.userId(), name: '', percentage: 0, description: '', isActive: true };
+    this.editingTaxId = null;
+    this.isAddingTax.set(false);
+  }
+
 }

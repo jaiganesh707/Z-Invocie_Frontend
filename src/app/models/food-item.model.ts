@@ -12,4 +12,6 @@ export interface FoodItem {
     createdAt?: string;
     updatedAt?: string;
     imageUrl?: string;
+    availableStocks?: number;
+    uniqueCode?: string;
 }

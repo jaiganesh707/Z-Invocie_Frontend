@@ -8,14 +8,28 @@
         <!-- Main Comparative Matrix -->
         <div class="col-lg-12">
             <div class="analytics-card">
-                <div class="d-flex justify-content-between align-items-center mb-5">
+                <div class="d-flex justify-content-between align-items-center mb-5 flex-wrap gap-4">
                     <div>
                         <h4 class="text-white mb-1 ls-tight">Stakeholder Profitability Matrix</h4>
                         <p class="text-muted text-emerald small mb-0 opacity-75">Comparative analysis of net realized
                             profit per node
                         </p>
                     </div>
-                    <div class="icon-box bg-primary bg-opacity-10 shadow-sm">
+
+                    <div
+                        class="d-flex align-items-center gap-2 bg-glass p-2 rounded-pill border border-glass shadow-sm">
+                        <button class="btn btn-sm px-4 rounded-pill transition-all fw-600 ls-wide text-white"
+                            [class.btn-premium]="period() === 'day'" [class.opacity-50]="period() !== 'day'"
+                            (click)="setPeriod('day')">DAY</button>
+                        <button class="btn btn-sm px-4 rounded-pill transition-all fw-600 ls-wide text-white"
+                            [class.btn-premium]="period() === 'month'" [class.opacity-50]="period() !== 'month'"
+                            (click)="setPeriod('month')">MONTH</button>
+                        <button class="btn btn-sm px-4 rounded-pill transition-all fw-600 ls-wide text-white"
+                            [class.btn-premium]="period() === 'year'" [class.opacity-50]="period() !== 'year'"
+                            (click)="setPeriod('year')">YEAR</button>
+                    </div>
+
+                    <div class="icon-box bg-primary bg-opacity-10 shadow-sm d-none d-md-flex">
                         <i class="bi bi-bar-chart-line text-primary"></i>
                     </div>
                 </div>

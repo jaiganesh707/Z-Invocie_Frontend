@@ -1,0 +1,87 @@
+<div class="container-fluid py-3 animate-fade">
+
+  <!-- Top Identity Bar -->
+  <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-glass">
+    <div>
+      <h4 class="fw-bold text-white mb-0 ls-tight">
+        <i class="bi bi-speedometer2 text-emerald me-2"></i>My Dashboard
+      </h4>
+      <div class="d-flex align-items-center mt-1 gap-2">
+        <div class="status-dot pulse-emerald"></div>
+        <span class="text-emerald small fw-bold opacity-75">{{ role | slice:5 | titlecase }}</span>
+        <span class="badge bg-glass border border-emerald-soft text-emerald px-2 py-1" style="font-size:0.68rem" *ngIf="uniqueKey">
+          {{ uniqueKey }}
+        </span>
+      </div>
+    </div>
+    <button class="btn btn-premium rounded-pill px-3 py-2 d-flex align-items-center gap-2" (click)="navigateToCreate()">
+      <i class="bi bi-plus-circle-fill"></i>
+      <span class="d-none d-sm-inline">Create Invoice</span>
+    </button>
+  </div>
+
+  <!-- Stats Cards Row -->
+  <div class="row g-3 mb-3">
+    <!-- Total Invoices -->
+    <div class="col-6 col-md-3">
+      <div class="glass-card p-3 h-100 text-center">
+        <div class="stat-icon mb-2" style="font-size:1.6rem; color: var(--primary)">
+          <i class="bi bi-file-earmark-text"></i>
+        </div>
+        <div class="text-white fw-black mb-1" style="font-size:clamp(1.5rem,4vw,2.2rem); line-height:1">
+          {{ isLoading ? '--' : totalInvoices }}
+        </div>
+        <div class="text-muted small text-uppercase" style="font-size:0.68rem; letter-spacing:1px">Total Invoices</div>
+      </div>
+    </div>
+
+    <!-- Approved -->
+    <div class="col-6 col-md-3">
+      <div class="glass-card p-3 h-100 text-center">
+        <div class="stat-icon mb-2" style="font-size:1.6rem; color:#34d399">
+          <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <div class="text-white fw-black mb-1" style="font-size:clamp(1.5rem,4vw,2.2rem); line-height:1">
+          {{ isLoading ? '--' : approvedCount }}
+        </div>
+        <div class="text-muted small text-uppercase" style="font-size:0.68rem; letter-spacing:1px">Approved</div>
+      </div>
+    </div>
+
+    <!-- Pending -->
+    <div class="col-6 col-md-3">
+      <div class="glass-card p-3 h-100 text-center">
+        <div class="stat-icon mb-2" style="font-size:1.6rem; color:#fbbf24">
+          <i class="bi bi-hourglass-split"></i>
+        </div>
+        <div class="fw-black mb-1" style="font-size:clamp(1.5rem,4vw,2.2rem); line-height:1; color:#fbbf24">
+          {{ isLoading ? '--' : pendingCount }}
+        </div>
+        <div class="text-muted small text-uppercase" style="font-size:0.68rem; letter-spacing:1px">Pending Review</div>
+      </div>
+    </div>
+
+    <!-- Total Amount -->
+    <div class="col-6 col-md-3">
+      <div class="glass-card p-3 h-100 text-center">
+        <div class="stat-icon mb-2" style="font-size:1.6rem; color:#60a5fa">
+          <i class="bi bi-currency-rupee"></i>
+        </div>
+        <div class="fw-black mb-1" style="font-size:clamp(1.1rem,3vw,1.6rem); line-height:1; color:#60a5fa">
+          ₹{{ isLoading ? '--' : (totalAmount | number:'1.0-0') }}
+        </div>
+        <div class="text-muted small text-uppercase" style="font-size:0.68rem; letter-spacing:1px">Total Billed</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom CTA to encourage action -->
+  <div class="glass-card p-4 mt-4 text-center animate-fade-in border-emerald border-opacity-10">
+      <i class="bi bi-lightning-charge text-emerald fs-1 d-block mb-3 opacity-50 pulse-emerald"></i>
+      <h5 class="text-white fw-bold">Ready to create more?</h5>
+      <p class="text-muted small">Your activity contributes to the organization's real-time financial accuracy.</p>
+      <button class="btn btn-premium rounded-pill px-5 py-2 mt-2" (click)="navigateToCreate()">
+          <i class="bi bi-plus-circle me-2"></i>Create New Invoice
+      </button>
+  </div>
+</div>

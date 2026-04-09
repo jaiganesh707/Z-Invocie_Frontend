@@ -1,0 +1,131 @@
+<div class="glass-container p-4 animate-fade px-md-5">
+    <!-- Header Section -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-4">
+        <div class="d-flex align-items-center">
+            <div class="icon-box bg-rose bg-opacity-10 me-3 shadow-lg" style="width: 60px; height: 60px; border-radius: 15px;">
+                <i class="bi bi-collection-play text-rose fs-3"></i>
+            </div>
+            <div>
+                <h2 class="text-white mb-0 ls-tight fw-bold">Commercial Asset Hub</h2>
+                <p class="text-white-50 small mb-0 opacity-75">Curated digital catalog of business branding and promotional nodes</p>
+            </div>
+        </div>
+
+        <button (click)="toggleForm()" class="btn btn-rose rounded-pill px-4 py-2 small fw-black text-dark shadow-neon-rose transition-all">
+            <i class="bi" [ngClass]="showForm() ? 'bi-x-lg' : 'bi-plus-lg'"></i>
+            {{ showForm() ? 'CANCEL PROVISIONING' : 'NEW BRAND ASSET' }}
+        </button>
+    </div>
+
+    <!-- Provisioning Form (Glass Card) -->
+    <div *ngIf="showForm()" class="glass-card mb-5 p-4 animate-slide-down border-rose border-opacity-25 shadow-rose-lg">
+        <h5 class="text-rose small ls-wide fw-bold mb-4 opacity-75">
+            <i class="bi bi-pencil-square me-2"></i> {{ editingAsset() ? 'UPDATE BRAND IDENTITY' : 'PROVISION NEW ASSET NODE' }}
+        </h5>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="image-provisioning-box bg-dark bg-opacity-25 rounded-4 border-dashed border-rose-soft p-3 text-center position-relative overflow-hidden mb-3" 
+                     (click)="fileInput.click()" style="min-height: 200px; cursor: pointer;">
+                    <input #fileInput type="file" (change)="onImageSelected($event)" accept="image/*" class="d-none">
+                    
+                    <div *ngIf="!assetImageUrl" class="py-4">
+                        <i class="bi bi-cloud-upload text-rose fs-1 mb-2"></i>
+                        <p class="text-white small fw-bold opacity-75">UPLOAD BRAND IMAGE</p>
+                        <span class="text-white-50 x-small fw-600 ls-wide">BANNERS, LOGOS, OR BREADCRUMBS</span>
+                    </div>
+
+                    <img *ngIf="assetImageUrl" [src]="assetImageUrl" class="w-100 h-100 object-fit-cover rounded-3 shadow-sm border border-rose-soft">
+                    
+                    <div *ngIf="assetImageUrl" class="position-absolute bottom-0 start-0 e-0 w-100 bg-rose bg-opacity-75 py-1 text-dark x-small fw-black ls-wide transition-all translate-y-hint pointer-events-none">
+                        CHANGE BRAND IMAGE
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="text-rose x-small fw-bold ls-wide mb-1 px-2">ASSET TERMINAL NAME</label>
+                        <input [(ngModel)]="assetName" type="text" class="form-control glass-input py-3 shadow-inner" placeholder="E.g. Summer Promo Banner 2026">
+                    </div>
+                    
+                    <div class="col-12">
+                        <label class="text-rose x-small fw-bold ls-wide mb-1 px-2">TARGET URL / REDIRECT LINK</label>
+                        <div class="input-group glass-input shadow-inner overflow-hidden">
+                            <span class="input-group-text bg-transparent border-0 text-white-50 small"><i class="bi bi-link-45deg"></i></span>
+                            <input [(ngModel)]="targetUrl" type="text" class="form-control bg-transparent border-0 text-white shadow-none" placeholder="E.g. www.business.com/promo">
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="text-rose x-small fw-bold ls-wide mb-1 px-2">DESCRIPTION / AUDIT NOTES</label>
+                        <textarea [(ngModel)]="description" class="form-control glass-input py-3 shadow-inner" rows="3" placeholder="Define the operational intent of this asset..."></textarea>
+                    </div>
+
+                    <div class="col-12 d-flex justify-content-end mt-4">
+                        <button (click)="saveAsset()" class="btn btn-rose btn-lg rounded-pill px-5 py-2 fw-black small shadow-neon-rose border-0" [disabled]="isSaving()">
+                            <i class="bi bi-shield-check me-2"></i>
+                            {{ isSaving() ? 'SYNCHRONIZING...' : (editingAsset() ? 'UPDATE TRANSACTION' : 'COMMIT ARCHIVE') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assets Ledger Grid -->
+    <div *ngIf="isLoading()" class="py-5 text-center opacity-50">
+        <div class="spinner-grow text-rose mb-3 shadow-neon-rose"></div>
+        <p class="ls-wide small text-rose fw-bold">SYNCHRONIZING ASSET LEDGER...</p>
+    </div>
+
+    <div *ngIf="!isLoading()" class="row g-4">
+        <div *ngFor="let asset of assets()" class="col-lg-4 col-md-6 animate-fade-in transition-all">
+            <div class="asset-card glass-card h-100 d-flex flex-column overflow-hidden border-glass transition-all hover-translate-y shadow-hover">
+                <!-- Card Image Area -->
+                <div class="asset-image-header position-relative overflow-hidden" style="height: 200px;">
+                    <img [src]="asset.assetImageUrl" class="w-100 h-100 object-fit-cover transition-slow" [alt]="asset.assetName">
+                    <!-- Overlay Control -->
+                    <div class="asset-actions position-absolute top-0 end-0 p-2 d-flex gap-2 translate-all-hint opacity-0">
+                        <button (click)="toggleForm(asset)" class="btn btn-glass-emerald btn-icon rounded-circle shadow-sm">
+                            <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <button (click)="deleteAsset(asset.id!)" class="btn btn-glass-rose btn-icon rounded-circle shadow-sm">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                    </div>
+                    <!-- Badge -->
+                    <span class="position-absolute bottom-0 start-0 m-3 px-3 py-1 glass-badge x-small fw-bold ls-wide text-white">
+                        <i class="bi bi-qr-code-scan me-1"></i> ASSET NODE
+                    </span>
+                </div>
+
+                <div class="p-4 flex-grow-1 d-flex flex-column">
+                    <h5 class="text-white fw-bold ls-tight mb-2">{{ asset.assetName }}</h5>
+                    <p class="text-white-50 x-small mb-4 opacity-75 line-clamp-3">{{ asset.description }}</p>
+                    
+                    <div class="mt-auto pt-3 border-top border-glass-soft d-flex justify-content-between align-items-center">
+                        <span class="x-small text-gold opacity-75 fw-bold ls-wide">
+                            <i class="bi bi-clock-history me-1"></i> {{ asset.createdAt | date:'MMM d, HH:mm' }}
+                        </span>
+                        
+                        <button *ngIf="asset.targetUrl" (click)="navigateTo(asset.targetUrl)" 
+                                class="btn btn-sm btn-glass text-rose border-rose-soft x-small fw-bold ls-wide px-3 py-2 rounded-pill hover-rose shadow-hover shadow-rose-sm">
+                            <i class="bi bi-box-arrow-up-right me-1"></i> GO TO URL
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="assets().length === 0" class="col-12 py-5 text-center">
+            <div class="mb-4 opacity-25">
+                <i class="bi bi-collection-play text-rose" style="font-size: 5rem;"></i>
+            </div>
+            <h4 class="text-rose opacity-50 fw-bold">NO BUSINESS ASSETS IDENTIFIED</h4>
+            <p class="text-white-50 small opacity-50">Prime identity has not yet provisioned branding assets for this terminal.</p>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,4 @@
+﻿                            <td class="py-4">
+                                <div class="text-white small fw-600">{{ inv.createdAt | date:'MMM d, y' }}</div>
+                                <div class="text-gold small opacity-75">{{ inv.createdAt | date:'HH:mm' }}</div>
+                            </td>

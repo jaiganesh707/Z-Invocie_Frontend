@@ -1,0 +1,227 @@
+<div class="row align-items-center mb-4">
+    <div class="col">
+        <h2 class="text-white mb-0">Products Catalog</h2>
+        <p class="text-emerald mb-0">Manage food items and stock availability</p>
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-outline-light" (click)="isAdding.set(true)">
+            <i class="bi bi-plus-lg me-2"></i>New Product
+        </button>
+    </div>
+</div>
+
+<div class="catalog-grid animate-fade-in" *ngIf="!isAdding()">
+    <div *ngFor="let item of foodItems()">
+        <div class="catalog-card">
+            <!-- Glass Reflection Element -->
+            <div class="glass-reflection"></div>
+
+            <div class="asset-thumb-orb">
+                <img *ngIf="item.imageUrl" [src]="getImageUrl(item.imageUrl)" class="img-fluid" alt="{{item.name}}">
+                <div *ngIf="!item.imageUrl" class="d-flex align-items-center justify-content-center h-100 w-100">
+                    <i class="bi bi-box-seam text-emerald display-6 opacity-30"></i>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <h5 class="text-white fw-900 ls-tight mb-1 text-truncate" [title]="item.name">{{ item.name }}</h5>
+                <p class="description-text">
+                    {{ item.description || 'No digital manifest available for this asset node.' }}
+                </p>
+            </div>
+
+            <div class="value-footer">
+                <div class="info-grid">
+                    <div class="info-row border-bottom border-white border-opacity-10 pb-2">
+                        <span class="label-text">VALUATION</span>
+                        <span class="val-text text-gold">{{ item.price | currency:item.currency }}</span>
+                    </div>
+                    <div class="info-row pt-1">
+                        <span class="label-text">STOCK VOL</span>
+                        <span class="badge-stock shadow-sm"
+                            [ngClass]="item.availableStocks && item.availableStocks > 8 ? 'bg-success bg-opacity-10 text-success' : 'bg-danger bg-opacity-10 text-danger'">
+                            {{ (item.availableStocks !== null && item.availableStocks !== undefined) ?
+                            item.availableStocks : '0' }} UNIT
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-bar">
+                <button class="btn-action btn-edit" (click)="editItem(item)">
+                    <i class="bi bi-pencil-square me-1"></i> EDIT
+                </button>
+                <button class="btn-action btn-purge" (click)="deleteFoodItem(item.id!)">
+                    <i class="bi bi-trash3-fill me-1"></i> PURGE
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="col-12" *ngIf="foodItems().length === 0">
+        <div class="text-center py-5">
+            <div class="asset-icon-box text-white mx-auto mb-3" style="width: 80px; height: 80px;">
+                <i class="bi bi-box fs-1 text-emerald"></i>
+            </div>
+            <h4 class="text-white">Empty Catalog</h4>
+            <p class="text-emerald">No products defined.</p>
+            <button class="btn btn-emerald mt-2 text-white" (click)="isAdding.set(true)">
+                <i class="bi bi-plus-lg me-2"></i>Add Asset
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Form -->
+<div class="row" *ngIf="isAdding()">
+    <div class="col-lg-8 mx-auto">
+        <div class="card bg-glass border-glass shadow-premium">
+            <div class="card-header border-bottom border-glass p-4 d-flex justify-content-between align-items-center">
+                <h4 class="text-white mb-0">
+                    <i class="bi bi-plus-circle text-emerald me-2"></i>
+                    {{ isEditing ? 'Edit Product' : 'Define New Product' }}
+                </h4>
+                <button class="btn btn-sm btn-outline-emerald" (click)="resetForm()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label class="form-label text-emerald small ls-wide fw-600">PRODUCT IDENTIFIER</label>
+                        <input type="text"
+                            class="form-control form-control-lg bg-dark text-white border-glass focus-ring-emerald"
+                            [(ngModel)]="newFoodItem.name" placeholder="e.g. Premium Widget">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-emerald small ls-wide fw-600">STOCKS AVAILABLE</label>
+                        <input type="number"
+                            class="form-control form-control-lg bg-dark text-white border-glass focus-ring-emerald"
+                            [(ngModel)]="newFoodItem.availableStocks" placeholder="e.g. 50">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label text-emerald small ls-wide fw-600">VALUATION</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-dark border-glass text-emerald">{{ newFoodItem.currency
+                                }}</span>
+                            <input type="number"
+                                class="form-control form-control-lg bg-dark text-white border-glass focus-ring-emerald"
+                                [(ngModel)]="newFoodItem.price" placeholder="0.00">
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label text-emerald small ls-wide fw-600">CURRENCY PREFIX</label>
+                        <input type="text"
+                            class="form-control form-control-lg bg-dark text-white border-glass focus-ring-emerald"
+                            [(ngModel)]="newFoodItem.currency" placeholder="e.g. INR">
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label text-emerald small ls-wide fw-600">ASPECTS / DESCRIPTION</label>
+                        <textarea class="form-control bg-dark text-white border-glass focus-ring-emerald"
+                            [(ngModel)]="newFoodItem.description" rows="3"
+                            placeholder="Enter product specifics..."></textarea>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <label class="form-label text-emerald small ls-wide fw-600 mb-0">VISUAL ASSET
+                                ACQUISITION</label>
+                            <div
+                                class="asset-type-selector d-flex p-1 rounded-pill bg-light bg-opacity-20 border border-glass-soft">
+                                <button type="button" class="btn btn-sm rounded-pill px-3 py-1 transition-all"
+                                    [ngClass]="!useExternalUrl() ? 'btn-emerald active shadow-sm' : 'text-emerald'"
+                                    (click)="useExternalUrl.set(false)">
+                                    <i class="bi bi-cloud-upload me-1"></i> UPLOAD
+                                </button>
+                                <button type="button" class="btn btn-sm rounded-pill px-3 py-1 transition-all"
+                                    [ngClass]="useExternalUrl() ? 'btn-emerald active shadow-sm' : 'text-emerald'"
+                                    (click)="useExternalUrl.set(true)">
+                                    <i class="bi bi-link-45deg me-1"></i> LINK
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Upload Channel -->
+                        <div *ngIf="!useExternalUrl()"
+                            class="upload-zone p-4 border rounded-4 border-glass text-center position-relative transition-all animate-fade-in"
+                            style="border-style: dashed !important; border-width: 2px !important; background: rgba(16, 185, 129, 0.05);">
+
+                            <input type="file"
+                                class="position-absolute w-100 h-100 top-0 start-0 opacity-0 cursor-pointer z-index-1"
+                                (change)="onFileSelected($event)" accept="image/*">
+
+                            <div *ngIf="!selectedFile && !newFoodItem.imageUrl" class="py-3 pointer-events-none">
+                                <i class="bi bi-cloud-arrow-up display-4 text-emerald mb-3"></i>
+                                <h6 class="text-black mb-1">Synchronize Local Asset</h6>
+                                <p class="text-muted small mb-0">Drag & drop or click to browse</p>
+                            </div>
+
+                            <div *ngIf="selectedFile" class="py-3 pointer-events-none">
+                                <div class="badge bg-emerald-soft text-black mb-2 p-2 px-3 border border-emerald-soft">
+                                    SELECTED NODE</div>
+                                <h6 class="text-black mb-0 text-truncate mx-auto" style="max-width: 300px;">
+                                    {{selectedFile.name}}</h6>
+                                <p class="text-emerald small mb-0 mt-1">Ready for registry upload</p>
+                            </div>
+
+                            <div *ngIf="newFoodItem.imageUrl && !selectedFile" class="py-2 pointer-events-none">
+                                <div class="asset-thumb-orb mx-auto shadow-sm" style="width: 80px; height: 80px;">
+                                    <img [src]="getImageUrl(newFoodItem.imageUrl)" class="img-fluid">
+                                </div>
+                                <p class="text-emerald small mb-0 mt-2">Current Active Asset</p>
+                            </div>
+                        </div>
+
+                        <!-- Link Channel -->
+                        <div *ngIf="useExternalUrl()"
+                            class="link-buffer p-4 rounded-4 bg-black bg-opacity-20 border border-emerald border-opacity-20 animate-fade-in">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <div
+                                        class="input-group input-group-lg bg-black bg-opacity-40 rounded-3 border border-glass-soft overflow-hidden">
+                                        <span class="input-group-text bg-transparent border-0 text-emerald pe-0">
+                                            <i class="bi bi-globe2 fs-5"></i>
+                                        </span>
+                                        <input type="url"
+                                            class="form-control bg-transparent border-0 text-white focus-ring-none py-3"
+                                            [(ngModel)]="newFoodItem.imageUrl"
+                                            placeholder="https://registry.external.asset/image.png">
+                                    </div>
+                                    <p class="x-small text-muted mt-2 fw-bold ls-tight px-1">
+                                        <i class="bi bi-info-circle me-1 text-emerald"></i>
+                                        ASSET WILL BE REFERENCED DIRECTLY FROM EXTERNAL REPOSITORY
+                                    </p>
+                                </div>
+                                <div *ngIf="newFoodItem.imageUrl" class="col-12 text-center pt-2">
+                                    <div class="asset-thumb-orb mx-auto shadow-premium border-emerald-soft"
+                                        style="width: 120px; height: 120px;">
+                                        <img [src]="newFoodItem.imageUrl"
+                                            (error)="$event.target.src = 'https://placehold.co/120?text=ERR'"
+                                            class="img-fluid">
+                                    </div>
+                                    <div
+                                        class="badge bg-black bg-opacity-40 text-emerald mt-2 x-small border border-glass-soft">
+                                        LIVE PREVIEW BUFFER</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-3 mt-5 pt-3 border-top border-glass">
+                    <button class="btn btn-outline-danger px-4" (click)="resetForm()">
+                        Abort
+                    </button>
+                    <button class="btn btn-outline-emerald px-5" (click)="addFoodItem()">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        {{ isEditing ? 'Update Product' : 'Add Product' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

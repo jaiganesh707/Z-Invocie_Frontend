@@ -1,0 +1,206 @@
+<div class="row align-items-center mb-4">
+    <div class="col">
+        <h2 class="text-white mb-0 ls-tight fw-900">{{ headTitle() }}</h2>
+        <p class="text-emerald mb-0 opacity-75">Workforce command and personnel control center</p>
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-emerald px-4 rounded-pill text-white fw-black shadow-neon-emerald"
+            (click)="isAdding.set(true)">
+            <i class="bi bi-person-plus-fill me-2"></i> {{ isChefMode() ? 'PROVISION HEAD' : 'PROVISION PERSONNEL' }}
+        </button>
+    </div>
+</div>
+
+<div class="row g-4 mb-5 animate-slide" *ngIf="!isAdding()">
+    <div class="col-md-4">
+        <div class="glass-card p-4 border-emerald-soft bg-emerald-soft h-100">
+            <div class="stat-label text-emerald small fw-bold text-uppercase ls-wide mb-1">{{ isChefMode() ? 'Total Created Heads' : 'Institutional Headcount' }}</div>
+            <h3 class="text-white fw-black mb-0">{{ totalHeadcount() }} {{ isChefMode() ? 'LEADERS' : 'PERSONNEL' }}</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card p-4 border-blue-soft bg-blue-soft h-100">
+            <div class="stat-label text-blue small fw-bold text-uppercase ls-wide mb-1">Active Workforce Nodes</div>
+            <h3 class="text-white fw-black mb-0">{{ totalActiveNodes() }} OPERATIONAL</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card p-4 border-warning-soft bg-warning-soft h-100">
+            <div class="stat-label text-warning small fw-bold text-uppercase ls-wide mb-1">Total Monthly Overhead</div>
+            <h3 class="text-white fw-black mb-0">₹{{ monthlyOverhead() | number:'1.2-2' }}</h3>
+        </div>
+    </div>
+</div>
+
+<div class="catalog-grid animate-fade-in" *ngIf="!isAdding()">
+    <div *ngFor="let emp of employees()">
+        <div class="catalog-card">
+            <div class="glass-reflection"></div>
+
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div class="asset-thumb-orb" style="width: 80px; height: 80px; margin-bottom: 0;">
+                    <img *ngIf="emp.imageUrl" [src]="getImageUrl(emp.imageUrl)" class="img-fluid" alt="{{emp.name}}">
+                    <div *ngIf="!emp.imageUrl"
+                        class="d-flex align-items-center justify-content-center h-100 w-100 bg-black bg-opacity-20">
+                        <i class="bi bi-person-badge text-emerald display-6 opacity-30"></i>
+                    </div>
+                </div>
+                <div>
+                    <h5 class="text-white fw-900 ls-tight mb-1">{{ emp.name }}</h5>
+                    <div class="badge-stock shadow-sm d-inline-block"
+                        [ngClass]="emp.status === 'ACTIVE' ? 'bg-success bg-opacity-10 text-success' : 'bg-warning bg-opacity-10 text-warning'">
+                        {{ emp.status }} NODE
+                    </div>
+                </div>
+            </div>
+
+            <div class="value-footer mb-3">
+                <div class="info-grid">
+                    <div class="info-row border-bottom border-white border-opacity-10 pb-2">
+                        <span class="label-text">DIGITAL ID (EMAIL)</span>
+                        <span class="val-text text-truncate ps-2" style="max-width: 150px;">{{ emp.email }}</span>
+                    </div>
+                    <div class="info-row border-bottom border-white border-opacity-10 py-2">
+                        <span class="label-text">WORKER LOGIN ID</span>
+                        <span class="val-text text-emerald fw-black ps-2">{{ emp.loginUsername || emp.email }}</span>
+                    </div>
+                    <div class="info-row border-bottom border-white border-opacity-10 py-2">
+                        <span class="label-text">DESIGNATION</span>
+                        <span class="val-text text-blue small fw-bold">{{ emp.designation }}</span>
+                    </div>
+                    <div class="info-row pt-2">
+                        <span class="label-text">COMPENSATION</span>
+                        <span class="val-text text-gold fw-900">₹{{ emp.salary | number:'1.2-2' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-bar mt-auto">
+                <button class="btn-action btn-edit" (click)="editEmployee(emp)">
+                    <i class="bi bi-pencil-square me-1"></i> EDIT
+                </button>
+                <button class="btn-action btn-purge" (click)="deleteEmployee(emp.id!)">
+                    <i class="bi bi-trash3-fill me-1"></i> PURGE
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="col-12 text-center py-5" *ngIf="employees().length === 0">
+        <div class="asset-icon-box mx-auto mb-4" style="width: 100px; height: 100px;">
+            <i class="bi bi-people-fill display-3 text-emerald opacity-20"></i>
+        </div>
+        <h4 class="text-white fw-900">{{ isChefMode() ? 'Chef Registry Empty' : 'Personnel Registry Empty' }}</h4>
+        <p class="text-emerald">{{ isChefMode() ? 'Designate your first department leader to begin leadership control.' : 'Provision your first institutional node to begin monitoring.' }}</p>
+        <button class="btn btn-emerald mt-3 px-5 py-3 rounded-pill fw-black shadow-neon-emerald text-white"
+            (click)="isAdding.set(true)">
+            {{ isChefMode() ? 'ADD CORE LEAD' : 'ADD HUB PERSONNEL' }}
+        </button>
+    </div>
+</div>
+
+<!-- Add/Edit Employee Modal Node -->
+<div class="animate-fade-in" *ngIf="isAdding()">
+    <div
+        class="glass-card p-4 p-md-5 rounded-5 border border-glass-soft bg-black bg-opacity-40 shadow-premium max-w-lg mx-auto">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h3 class="text-white fw-900 mb-1">
+                    {{ isEditing ? 'SYNCHRONIZE NODE' : (isChefMode() ? 'PROVISION NEW HEAD' : 'PROVISION NEW NODE') }}
+                </h3>
+                <p class="text-emerald small opacity-75 mb-0">{{ isChefMode() ? 'Establish a new institutional authority' : 'Input high-fidelity personnel identifiers' }}</p>
+            </div>
+            <button class="btn btn-glass text-white border-glass rounded-circle p-2" (click)="resetForm()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <label class="form-label text-emerald small ls-wide fw-900">FULL NAME IDENTIFIER</label>
+                <input type="text" id="employeeName" name="employeeName"
+                    class="form-control form-control-lg bg-black bg-opacity-40 text-white border-glass focus-ring-emerald"
+                    [(ngModel)]="newEmployee.name" placeholder="Operational Name">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-emerald small ls-wide fw-900">DIGITAL IDENTITY (EMAIL)</label>
+                <input type="email" id="employeeEmail" name="employeeEmail"
+                    class="form-control form-control-lg bg-black bg-opacity-40 text-white border-glass focus-ring-emerald"
+                    [(ngModel)]="newEmployee.email" placeholder="name@domain.digital">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-emerald small ls-wide fw-900">OFFICIAL DESIGNATION</label>
+                <input type="text" id="employeeDesignation" name="employeeDesignation"
+                    class="form-control form-control-lg bg-black bg-opacity-40 text-white border-glass focus-ring-emerald"
+                    [(ngModel)]="newEmployee.designation" placeholder="e.g. Lead Engineer">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-emerald small ls-wide fw-900">COMPENSATION (₹)</label>
+                <input type="number" id="employeeSalary" name="employeeSalary"
+                    class="form-control form-control-lg bg-black bg-opacity-40 text-white border-glass focus-ring-emerald"
+                    [(ngModel)]="newEmployee.salary">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-emerald small ls-wide fw-900">DEPARTMENT CODE</label>
+                <select id="employeeDepartment" name="employeeDepartment"
+                    class="form-select form-select-lg bg-black bg-opacity-40 text-white border-glass focus-ring-white"
+                    [(ngModel)]="newEmployee.department">
+                    <option *ngFor="let opt of filteredDepartments()" [value]="opt.value">{{ opt.label }}</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-emerald small ls-wide fw-900">STATUS PROTOCOL</label>
+                <select id="employeeStatus" name="employeeStatus"
+                    class="form-select form-select-lg bg-black bg-opacity-40 text-white border-glass focus-ring-emerald"
+                    [(ngModel)]="newEmployee.status">
+                    <option value="ACTIVE">ACTIVE NODES</option>
+                    <option value="ON_LEAVE">LEAVE CYCLE</option>
+                    <option value="TERMINATED">TERMINATED</option>
+                </select>
+            </div>
+
+            <!-- Worker Login Credentials (Only for New Employees) -->
+            <div class="col-md-6" *ngIf="!isEditing">
+                <label class="form-label text-emerald small ls-wide fw-900">LOGIN USERNAME (OPTIONAL)</label>
+                <input type="text" id="employeeUsername" name="employeeUsername"
+                    class="form-control form-control-lg bg-black bg-opacity-40 text-white border-glass focus-ring-white"
+                    placeholder="Default: Digital Identity (Email)" [(ngModel)]="newEmployee.loginUsername">
+            </div>
+            <div class="col-md-6" *ngIf="!isEditing">
+                <label class="form-label text-emerald small ls-wide fw-900">LOGIN PASSWORD (OPTIONAL)</label>
+                <input type="password" id="employeePassword" name="employeePassword"
+                    class="form-control form-control-lg bg-black bg-opacity-40 text-white border-glass focus-ring-white"
+                    placeholder="Default: Welcome@123" [(ngModel)]="newEmployee.loginPassword">
+                <div class="text-white extra-small opacity-50 mt-1">Default Protocol: Welcome@123</div>
+            </div>
+
+            <div class="col-12">
+                <label class="form-label text-emerald small ls-wide fw-900">VISUAL ASSET INDEXING</label>
+                <div class="upload-zone p-4 border rounded-4 border-glass text-center position-relative transition-all"
+                    style="border-style: dashed !important; border-width: 2px !important; background: rgba(16, 185, 129, 0.05);">
+                    <input type="file" id="employeeImage" name="employeeImage"
+                        class="position-absolute w-100 h-100 top-0 start-0 opacity-0 cursor-pointer z-index-1"
+                        (change)="onFileSelected($event)" accept="image/*">
+
+                    <div *ngIf="!selectedFile && !newEmployee.imageUrl" class="py-3">
+                        <i class="bi bi-camera-fill display-4 text-emerald mb-3"></i>
+                        <h6 class="text-white mb-1">Click to Capture Personnel Asset</h6>
+                    </div>
+
+                    <div *ngIf="selectedFile" class="py-3">
+                        <i class="bi bi-check-circle-fill display-6 text-emerald mb-2"></i>
+                        <h6 class="text-white mb-0">{{ selectedFile.name }}</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-3 mt-5 pt-4 border-top border-glass-soft">
+            <button class="btn btn-outline-light px-4 rounded-pill fw-bold" (click)="resetForm()">ABORT</button>
+            <button class="btn btn-emerald px-5 rounded-pill fw-black shadow-neon-emerald" (click)="saveEmployee()">
+                <i class="bi bi-rocket-takeoff me-2"></i> {{ isEditing ? 'UPDATE NODE' : 'LAUNCH NODE' }}
+            </button>
+        </div>
+    </div>
+</div>
